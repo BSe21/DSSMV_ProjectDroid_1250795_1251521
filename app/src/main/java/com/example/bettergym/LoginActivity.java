@@ -23,6 +23,10 @@ public class LoginActivity extends AppCompatActivity {
         editPassword = findViewById(R.id.editPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
+        //Link para ecrã de registo
+        findViewById(R.id.txtRegistar).setOnClickListener(v ->
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class)));
+
         // 2. Ação do botão
         btnLogin.setOnClickListener(v -> {
             String email = editEmail.getText().toString().trim();

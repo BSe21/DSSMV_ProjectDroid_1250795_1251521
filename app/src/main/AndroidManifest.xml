@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BetterGym" >
         <activity
+                android:name=".RegisterActivity"
+                android:exported="false"/>
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity

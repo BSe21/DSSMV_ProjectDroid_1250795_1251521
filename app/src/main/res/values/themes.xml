@@ -2,7 +2,10 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.BetterGym" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/primary</item>
     </style>
 
     <style name="Theme.BetterGym" parent="Base.Theme.BetterGym"/>
