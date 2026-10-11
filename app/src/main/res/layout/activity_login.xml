@@ -14,12 +14,11 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
             android:fontFamily="sans-serif-black"
             android:text="BetterGym"
             android:textColor="@color/primary"
             android:textSize="44sp"
-            app:layout_constraintBottom_toTopOf="@+id/emailLayout"
+            app:layout_constraintBottom_toTopOf="@+id/subtitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -34,6 +33,7 @@
             android:text="Bem-vindo de volta! 💪"
             android:textColor="#666666"
             android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/emailLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title" />
@@ -52,15 +52,13 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusTopStart="12dp"
             app:layout_constraintBottom_toTopOf="@+id/passwordLayout"
-            app:layout_constraintTop_toBottomOf="@id/subtitle"
-            app:layout_constraintVertical_chainStyle="packed">
+            app:layout_constraintTop_toBottomOf="@id/subtitle">
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-        />
+                android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Caixa de Password com cantos arredondados -->
@@ -83,8 +81,7 @@
                 android:id="@+id/editPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-        />
+                android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Botão Principal (Maior e com texto Bold) -->
