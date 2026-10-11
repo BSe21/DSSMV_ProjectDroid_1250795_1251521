@@ -1,4 +1,4 @@
-package com.example.bettergym;
+package com.example.bettergym.api;
 
 import android.os.Handler;
 import android.os.Looper;

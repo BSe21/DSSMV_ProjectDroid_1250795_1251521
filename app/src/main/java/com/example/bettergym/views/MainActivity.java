@@ -1,4 +1,4 @@
-package com.example.bettergym;
+package com.example.bettergym.views;
 
 import android.os.Bundle;
 
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import com.example.bettergym.R;
 
 public class MainActivity extends AppCompatActivity {
 

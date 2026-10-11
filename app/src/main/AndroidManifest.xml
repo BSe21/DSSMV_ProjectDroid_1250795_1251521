@@ -13,13 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BetterGym" >
         <activity
-                android:name=".RegisterActivity"
+                android:name=".views.RegisterActivity"
                 android:exported="false"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".views.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".views.LoginActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

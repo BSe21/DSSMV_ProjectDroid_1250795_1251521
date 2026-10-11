@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:background="#FAFAFA"
         android:padding="32dp"
-        tools:context=".LoginActivity">
+        tools:context=".views.LoginActivity">
 
     <!-- Título da App com Tipografia Forte -->
     <TextView
