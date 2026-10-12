@@ -3,35 +3,50 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#F8F9FA"
         tools:context=".views.MainActivity">
 
-    <!-- FrameLayout onde vais carregar o Mapa (ou os ecrãs) diretamente no código da Activity -->
-
-    <!-- Menu de Navegação Inferior (Cores padrão, sem seletores) -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNavigation"
-            android:layout_width="0dp"
-            android:layout_height="70dp"
-            android:background="@color/white"
-            app:elevation="20dp"
-            app:itemIconTint="@color/primary"
-            app:itemTextColor="@color/primary"
-            app:labelVisibilityMode="labeled"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:menu="@menu/bottom_nav_menu" />
+    <!-- Container onde o Mapa ou os Ecrãs vão aparecer -->
     <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+            app:layout_constraintBottom_toTopOf="@id/cardBottomNav"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintVertical_bias="0.0"/>
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- CardView para dar o efeito flutuante com cantos arredondados automaticamente -->
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardBottomNav"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="12dp"
+            app:cardBackgroundColor="@color/white"
+            app:strokeWidth="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Menu de Navegação Inferior -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNavigation"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:background="@android:color/transparent"
+                app:itemIconTint="@color/primary"
+                app:itemTextColor="@color/primary"
+                app:itemRippleColor="@color/secondary"
+                app:labelVisibilityMode="labeled"
+                app:menu="@menu/bottom_nav_menu" />
+
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
