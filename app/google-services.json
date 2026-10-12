@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "429373935322",
+    "project_id": "bettergym-9304c",
+    "storage_bucket": "bettergym-9304c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429373935322:android:d32d2d7fab8cdfdd4ddfe3",
+        "android_client_info": {
+          "package_name": "com.example.bettergym"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnhal9_LvpuMPnoyfDN6Mj8o63TnI68TU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

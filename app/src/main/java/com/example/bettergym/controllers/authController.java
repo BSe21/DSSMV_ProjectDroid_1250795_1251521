@@ -2,17 +2,22 @@ package com.example.bettergym.controllers;
 
 import android.util.Patterns;
 
-import com.example.bettergym.api.SupabaseHelper; // Ajusta o package se o teu SupabaseHelper estiver noutro sítio
-import com.example.bettergym.exceptions.DuplicatedDataException;
 import com.example.bettergym.exceptions.InvalidDataException;
-
-import org.json.JSONObject;
+import com.example.bettergym.model.Perfil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
 public class authController {
+
+    private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     // Interface para comunicar o sucesso ou erro de volta à Activity
     public interface AuthCallback {
         void onSucesso(String mensagem);
@@ -23,7 +28,7 @@ public class authController {
                                   String telefone, String email, String password,
                                   String confirmarPassword, AuthCallback callback) {
 
-        // 1. Validações a lançar as exceções do professor (como são RuntimeException, não precisam de throws obrigatório)
+        // 1. Validações mantidas com as exceções do professor
         if (nome.isEmpty() || username.isEmpty() || dataNascimento.isEmpty() || telefone.isEmpty() || email.isEmpty() || password.isEmpty()) {
             throw new InvalidDataException("Por favor, preenche todos os campos obrigatórios.");
         }
@@ -40,125 +45,77 @@ public class authController {
             throw new InvalidDataException("As passwords não coincidem.");
         }
 
-        // 2. Pedido HTTP para o Supabase Auth (Sign Up)
-        try {
-            JSONObject dados = new JSONObject();
-            dados.put("email", email);
-            dados.put("password", password);
+        // 2. Criar utilizador com Firebase Auth (substitui o pedido HTTP do Supabase)
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            String userId = firebaseUser.getUid();
 
-            JSONObject metadados = new JSONObject();
-            metadados.put("nome_completo", nome);
-            metadados.put("nome_utilizador", username);
-            metadados.put("data_nascimento", dataNascimento);
-            metadados.put("numero_telemovel", telefone);
-            dados.put("data_nascimento", metadados);
-
-            SupabaseHelper.fazerPedido("POST", "auth/v1/signup", dados, new SupabaseHelper.ApiCallback() {
-                @Override
-                public void onSuccess(int statusCode, String responseJson) {
-                    try {
-                        JSONObject resposta = new JSONObject(responseJson);
-
-                        String userId = resposta.has("user")
-                                ? resposta.getJSONObject("user").getString("id")
-                                : resposta.getString("id");
-
-                        // Se o Auth tiver sucesso, criamos o perfil na tabela pública
-                        criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, callback);
-
-                    } catch (Exception e) {
-                        callback.onErro("Erro ao processar a resposta do servidor.");
+                            // 3. Se o Auth tiver sucesso, criamos o perfil na coleção "perfis" do Firestore
+                            criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, email, callback);
+                        }
+                    } else {
+                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "";
+                        String msg = "Não foi possível criar a conta.";
+                        if (errorMessage != null && (errorMessage.contains("already in use") || errorMessage.contains("address is already in use"))) {
+                            msg = "Já existe uma conta registada com este email.";
+                        } else if (errorMessage != null && errorMessage.contains("weak password")) {
+                            msg = "A password é demasiado fraca.";
+                        }
+                        callback.onErro(msg);
                     }
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    String msg = errorMessage;
-                    if (errorMessage.contains("user_already_exists") || errorMessage.contains("already registered")) {
-                        msg = "Já existe uma conta registada com este email.";
-                    } else if (errorMessage.contains("weak_password")) {
-                        msg = "A password é demasiado fraca.";
-                    } else if (errorMessage.startsWith("Falha de ligação")) {
-                        msg = "Sem ligação à internet. Verifica a rede.";
-                    }
-                    callback.onErro(msg);
-                }
-            });
-
-        } catch (Exception e) {
-            callback.onErro("Erro interno ao preparar os dados de registo.");
-        }
+                });
     }
 
-    // 3. Passo interno: Insere o perfil na tabela "perfis" do Supabase
+    // 4. Passo interno: Insere o perfil na coleção "perfis" do Firestore usando o model que criámos
     private void criarPerfilNaTabela(String userId, String nome, String username,
-                                     String dataNascimento, String telefone, AuthCallback callback) {
+                                     String dataNascimento, String telefone, String email, AuthCallback callback) {
         try {
             SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
             iso.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-            JSONObject perfil = new JSONObject();
-            perfil.put("id", userId);
-            perfil.put("nome_completo", nome);
-            perfil.put("username", username);
-            perfil.put("data_nascimento", dataNascimento);
-            perfil.put("telemovel", telefone);
-            perfil.put("data_registo", iso.format(new Date()));
+            // Usamos a classe Perfil que criámos anteriormente na pasta models
+            Perfil perfil = new Perfil(
+                    userId,
+                    nome,
+                    username,
+                    email,
+                    dataNascimento,
+                    telefone,
 
-            SupabaseHelper.fazerPedido("POST", "rest/v1/perfis", perfil, new SupabaseHelper.ApiCallback() {
-                @Override
-                public void onSuccess(int statusCode, String responseJson) {
-                    callback.onSucesso("Conta criada com sucesso! Podes fazer login.");
-                }
+                    "", // foto_url vazia por agora
+                    iso.format(new Date())
+            );
 
-                @Override
-                public void onFailure(String errorMessage) {
-                    callback.onSucesso("Conta criada, mas houve um erro ao guardar o perfil. Tenta fazer login.");
-                }
-            });
+            db.collection("perfis").document(userId)
+                    .set(perfil)
+                    .addOnSuccessListener(aVoid -> callback.onSucesso("Conta criada com sucesso! Podes fazer login."))
+                    .addOnFailureListener(e -> callback.onSucesso("Conta criada, mas houve um erro ao guardar o perfil. Tenta fazer login."));
 
         } catch (Exception e) {
             callback.onErro("Erro ao estruturar os dados do perfil.");
         }
     }
+
     public void fazerLogin(String email, String password, AuthCallback callback) {
-        // Validações básicas com as exceções do professor se quisesses, ou validação simples
         if (email.isEmpty() || password.isEmpty()) {
             callback.onErro("Preenche o email e a password!");
             return;
         }
 
-        try {
-            JSONObject dadosLogin = new JSONObject();
-            dadosLogin.put("email", email);
-            dadosLogin.put("password", password);
-
-            SupabaseHelper.fazerPedido("POST", "auth/v1/token?grant_type=password", dadosLogin, new SupabaseHelper.ApiCallback() {
-                @Override
-                public void onSuccess(int statusCode, String responseJson) {
-                    try {
-                        JSONObject resposta = new JSONObject(responseJson);
-                        String token = resposta.getString("access_token");
-                        String userId = resposta.getJSONObject("user").getString("id");
-
-                        // Devolvemos o token e o userId através do callback (podes adaptar o callback se precisares)
-                        callback.onSucesso(token + "|" + userId);
-
-                    } catch (Exception e) {
-                        callback.onErro("Erro ao processar a resposta do servidor.");
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            // Devolvemos o UID do utilizador no sucesso
+                            callback.onSucesso(user.getUid());
+                        }
+                    } else {
+                        callback.onErro("Email ou palavra-passe incorretos!");
                     }
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    callback.onErro("Email ou palavra-passe incorretos!");
-                }
-            });
-
-        } catch (Exception e) {
-            callback.onErro("Erro interno ao preparar o login.");
-        }
+                });
     }
-
 }
-

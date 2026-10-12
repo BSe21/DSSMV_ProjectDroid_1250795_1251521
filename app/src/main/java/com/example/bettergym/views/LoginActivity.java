@@ -43,19 +43,13 @@ public class LoginActivity extends AppCompatActivity {
             // Chamar o Controller
             authController.fazerLogin(email, password, new authController.AuthCallback() {
                 @Override
-                public void onSucesso(String resultado) {
+                public void onSucesso(String userId) { // Agora recebemos diretamente o userId
                     btnLogin.setEnabled(true);
                     btnLogin.setText("Entrar");
 
-                    // O resultado traz "token|userId" separado por pipe
-                    String[] partes = resultado.split("\\|");
-                    String token = partes[0];
-                    String userId = partes[1];
-
-                    // Guardar nas SharedPreferences
+                    // Guardar nas SharedPreferences (o Firebase Auth gere o token internamente de forma automática)
                     getSharedPreferences("BetterGymApp", MODE_PRIVATE)
                             .edit()
-                            .putString("token", token)
                             .putString("user_id", userId)
                             .apply();
 
