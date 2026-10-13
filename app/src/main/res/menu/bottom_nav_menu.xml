@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
             android:id="@+id/nav_mapa"
-            android:icon="@android:drawable/ic_menu_mapmode"
+            android:icon="@drawable/outline_add_location_24"
             android:title="Mapa" />
 
     <item
             android:id="@+id/nav_ginasios"
-            android:icon="@android:drawable/ic_menu_compass"
+            android:icon="@drawable/outline_add_location_24"
             android:title="Ginásios" />
 
     <item
             android:id="@+id/nav_favoritos"
-            android:icon="@android:drawable/star_on"
+            android:icon="@drawable/outline_add_location_24"
             android:title="Favoritos" />
 
     <item
             android:id="@+id/nav_perfil"
-            android:icon="@android:drawable/ic_menu_myplaces"
+            android:icon="@drawable/outline_add_location_24"
             android:title="Perfil" />
+
 </menu>
