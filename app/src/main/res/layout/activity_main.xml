@@ -6,20 +6,30 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FAFAFA"
         tools:context=".views.MainActivity">
 
-    <!-- Container onde o Mapa ou os Ecrãs vão aparecer -->
-    <FrameLayout
-            android:id="@+id/fragmentContainer"
+    <!-- 1. Top App Bar importada de ficheiro separado -->
+    <include
+            android:id="@+id/includeTopAppBar"
+            layout="@layout/top_app_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 2. Mapa Principal -->
+    <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/mapaPrincipal"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/includeTopAppBar"
             app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Navigation Bar oficial do Material Design 3 -->
+    <!-- 3. Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"
             android:layout_width="0dp"
@@ -28,9 +38,8 @@
             app:elevation="8dp"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/bottom_nav_menu"
-            app:itemActiveIndicatorColor="@color/primary"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

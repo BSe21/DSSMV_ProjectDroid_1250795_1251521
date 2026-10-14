@@ -43,8 +43,13 @@ android {
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.8.0")
-    implementation("com.google.android.material:material:1.14.0")
+    implementation("com.google.android.material:material:1.12.0")
 
+
+    implementation("com.google.android.gms:play-services-maps:20.1.0")
+
+    // Para obter o GPS do utilizador
+    implementation("com.google.android.gms:play-services-location:21.4.0")
     // 1. A BoM do Firebase (já tinhas)
     implementation(platform("com.google.firebase:firebase-bom:35.0.0"))
 
