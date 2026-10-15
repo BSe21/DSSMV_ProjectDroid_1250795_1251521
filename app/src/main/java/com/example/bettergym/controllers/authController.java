@@ -45,7 +45,7 @@ public class authController {
             throw new InvalidDataException("As passwords não coincidem.");
         }
 
-        // 2. Criar utilizador com Firebase Auth (substitui o pedido HTTP do Supabase)
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
