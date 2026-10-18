@@ -6,6 +6,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.bettergym.R;
 import com.example.bettergym.controllers.authController;
+import com.example.bettergym.service.AuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -13,7 +14,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText editEmail, editPassword;
     private MaterialButton btnLogin;
-    private authController authController;
+    private AuthService authService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // Inicializar o Controller
-        authController = new authController();
+        authService = new AuthService();
 
         // Ligar as variáveis ao ecrã (XML)
         editEmail = findViewById(R.id.editEmail);
@@ -41,13 +42,13 @@ public class LoginActivity extends AppCompatActivity {
             btnLogin.setText("A entrar...");
 
             // Chamar o Controller
-            authController.fazerLogin(email, password, new authController.AuthCallback() {
+            authService.fazerLogin(email, password, new AuthService.AuthCallback() {
                 @Override
-                public void onSucesso(String userId) { // Agora recebemos diretamente o userId
+                public void onSucesso(String userId) { // Se o teu serviço já devolver o Model User, mudas aqui para (User user) e usas user.getId()
                     btnLogin.setEnabled(true);
                     btnLogin.setText("Entrar");
 
-                    // Guardar nas SharedPreferences (o Firebase Auth gere o token internamente de forma automática)
+                    // Guardar nas SharedPreferences
                     getSharedPreferences("BetterGymApp", MODE_PRIVATE)
                             .edit()
                             .putString("user_id", userId)
@@ -59,7 +60,6 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 }
-
                 @Override
                 public void onErro(String erro) {
                     btnLogin.setEnabled(true);

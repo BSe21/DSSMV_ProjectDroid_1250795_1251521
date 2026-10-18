@@ -15,6 +15,7 @@ import com.example.bettergym.controllers.authController;
 import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.exceptions.DuplicatedDataException;
 import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.service.AuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -28,7 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText editNome, editUsername, editBirthDate, editPhone, editEmail, editPassword, editConfirmPassword;
     private MaterialButton btnRegistar;
-    private authController authController;
+    private AuthService authService;
 
     private final ActivityResultLauncher<String> galeriaLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
@@ -45,7 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        authController = new authController();
+        authService = new AuthService();
 
         imgProfile = findViewById(R.id.imgProfile);
         editNome = findViewById(R.id.editNome);
@@ -95,7 +96,7 @@ public class RegisterActivity extends AppCompatActivity {
             btnRegistar.setEnabled(false);
             btnRegistar.setText("A criar conta...");
 
-            authController.registarNovaConta(nome, username, dataNasc, telefone, email, password, confirmar, new authController.AuthCallback() {
+            authService.registarNovaConta(nome, username, dataNasc, telefone, email, password, confirmar, new AuthService.AuthCallback() {
                 @Override
                 public void onSucesso(String mensagem) {
                     Toast.makeText(RegisterActivity.this, mensagem, Toast.LENGTH_LONG).show();

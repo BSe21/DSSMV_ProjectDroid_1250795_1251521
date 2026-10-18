@@ -1,6 +1,7 @@
-package com.example.bettergym.views;
+package com.example.bettergym.views; // MUDADO PARA ui
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
@@ -19,22 +20,34 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.bettergym.R;
-import com.example.bettergym.controllers.mapController;
+import com.example.bettergym.model.Ginasio;
+import com.example.bettergym.service.PlacesService;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private mapController mapController;
+    private GoogleMap mMap;
+    private PlacesService placesService;
+    private FusedLocationProviderClient fusedLocationClient;
     private OnBackPressedCallback voltarDoPerfil;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
                 if (isGranted) {
-                    mapController.ativarLocalizacaoECentrar();
+                    ativarLocalizacaoECentrar();
                 } else {
                     Toast.makeText(this, "Permissão de GPS recusada", Toast.LENGTH_SHORT).show();
                 }
@@ -47,14 +60,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // 1. Instancia o Serviço e o Cliente de GPS
+        placesService = new PlacesService();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        // 1. Instancia o controlador do mapa
-        mapController = new mapController(this);
 
         // 2. Prepara o mapa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -66,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // 3. Barra de navegação inferior
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 
-        // Botão "voltar" no Perfil: regressa ao mapa em vez de sair da app
         voltarDoPerfil = new OnBackPressedCallback(false) {
             @Override
             public void handleOnBackPressed() {
@@ -83,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
 
-            esconderPerfil();   // qualquer outro separador volta a mostrar o mapa
+            esconderPerfil();
             if (itemId == R.id.nav_mapa) {
                 return true;
             } else if (itemId == R.id.nav_ginasios) {
@@ -95,11 +108,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    // Mostra o Perfil por cima do mapa, mantendo a barra de navegação em baixo
     private void mostrarPerfil() {
         findViewById(R.id.containerPerfil).setVisibility(View.VISIBLE);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.containerPerfil, new PerfilFragment())
+                .replace(R.id.containerPerfil, new PerfilFragment()) // Não te esqueças de meter o PerfilFragment na pasta 'ui' também!
                 .commit();
         voltarDoPerfil.setEnabled(true);
     }
@@ -115,16 +127,78 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        mapController.setMap(googleMap);
+        mMap = googleMap;
+
+        // Aplica o estilo visual diretamente na View
+        aplicarEstiloLimpo();
+        ajustarEspacamento();
+
         verificarPermissaoGPS();
+    }
+
+    private void aplicarEstiloLimpo() {
+        try {
+            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ajustarEspacamento() {
+        int paddingBottom = (int) (65 * getResources().getDisplayMetrics().density);
+        mMap.setPadding(0, 0, 0, paddingBottom);
     }
 
     private void verificarPermissaoGPS() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            mapController.ativarLocalizacaoECentrar();
+            ativarLocalizacaoECentrar();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void ativarLocalizacaoECentrar() {
+        if (mMap == null) return;
+
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                LatLng minhaPosicao = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(minhaPosicao, 14.5f));
+
+                // 4. Pede os dados ao PlacesService (agora focado apenas na API)
+                placesService.pesquisarGinasiosProximos(minhaPosicao, new PlacesService.OnGymsLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Ginasio> ginasios) {
+                        runOnUiThread(() -> desenharMarcadores(ginasios));
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Aguardando sinal de GPS...", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void desenharMarcadores(List<Ginasio> ginasios) {
+        if (mMap == null) return;
+        mMap.clear();
+
+        for (Ginasio g : ginasios) {
+            LatLng posicao = new LatLng(g.getLatitude(), g.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                    .position(posicao)
+                    .title(g.getNome())
+                    .snippet("Rating: " + g.getRating())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
         }
     }
 }

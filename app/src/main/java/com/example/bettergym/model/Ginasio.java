@@ -5,18 +5,18 @@ import java.io.Serializable;
 public class Ginasio implements Serializable {
     private String id;
     private String nome;
-    private String google_place_id;
     private double latitude;
     private double longitude;
+    private double rating;
 
     public Ginasio() {}
 
-    public Ginasio(String id, String nome, String google_place_id, double latitude, double longitude) {
-        this.id = id;
+    public Ginasio(String google_place_id, String nome, double latitude, double longitude, double rating) {
+        this.id = google_place_id;
         this.nome = nome;
-        this.google_place_id = google_place_id;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.rating = rating;
     }
 
     public String getId() { return id; }
@@ -25,12 +25,13 @@ public class Ginasio implements Serializable {
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
-    public String getGoogle_place_id() { return google_place_id; }
-    public void setGoogle_place_id(String google_place_id) { this.google_place_id = google_place_id; }
 
     public double getLatitude() { return latitude; }
     public void setLatitude(double latitude) { this.latitude = latitude; }
 
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public double getRating() { return rating; }
+    public void setRating(double rating) { this.rating = rating; }
 }
