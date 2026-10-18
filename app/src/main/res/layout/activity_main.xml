@@ -29,6 +29,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+    <!--  2.1 Contentor do ecrã de Perfil (aparece por cima do mapa, entre a barra de cima e a de baixo)  -->
+    <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/containerPerfil"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/includeTopAppBar"
+            app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- 3. Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"
