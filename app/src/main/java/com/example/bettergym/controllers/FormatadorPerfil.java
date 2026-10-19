@@ -5,11 +5,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/**
- * Funções de formatação dos dados do perfil para apresentação no ecrã.
- * <p>
- * Não usa classes do Android, por isso pode ser testada com testes unitários.
- */
+//Funções de formatação dos dados do perfil para apresentação no ecrã
 public final class FormatadorPerfil {
 
     private static final String VALOR_VAZIO = "—";
@@ -19,22 +15,12 @@ public final class FormatadorPerfil {
     private FormatadorPerfil() {
     }
 
-    /**
-     * Devolve o valor recebido, ou um traço se estiver vazio.
-     *
-     * @param valor texto a apresentar
-     * @return o próprio texto ou "—"
-     */
+    //Devolve o valor recebido, ou um traço se estiver vazio.
     public static String valorOuTraco(String valor) {
         return (valor == null || valor.trim().isEmpty()) ? VALOR_VAZIO : valor;
     }
 
-    /**
-     * Calcula as iniciais de um nome: primeira letra do primeiro e do último nome.
-     *
-     * @param nomeCompleto nome completo do utilizador
-     * @return iniciais em maiúsculas, ou "?" se o nome estiver vazio
-     */
+    //Calcula as iniciais de um nome: primeira letra do primeiro e do último nome.
     public static String calcularIniciais(String nomeCompleto) {
         if (nomeCompleto == null || nomeCompleto.trim().isEmpty()) {
             return "?";
@@ -48,12 +34,7 @@ public final class FormatadorPerfil {
         return (primeira + ultima).toUpperCase(Locale.ROOT);
     }
 
-    /**
-     * Devolve o nome de utilizador com "@" à frente.
-     *
-     * @param username nome de utilizador
-     * @return "@username", ou texto vazio se não existir
-     */
+    //Devolve o nome de utilizador com "@" à frente.
     public static String formatarNomeUtilizador(String username) {
         if (username == null || username.trim().isEmpty()) {
             return "";
@@ -61,12 +42,7 @@ public final class FormatadorPerfil {
         return "@" + username;
     }
 
-    /**
-     * Converte a data de registo ("2026-10-15T19:45:45Z") para "15/10/2026".
-     *
-     * @param dataIso data no formato ISO, em UTC
-     * @return data formatada; o texto original se não for possível converter; "—" se estiver vazio
-     */
+    //Converte a data de registo ("2026-10-15T19:45:45Z") para "15/10/2026".
     public static String formatarDataRegisto(String dataIso) {
         if (dataIso == null || dataIso.trim().isEmpty()) {
             return VALOR_VAZIO;
