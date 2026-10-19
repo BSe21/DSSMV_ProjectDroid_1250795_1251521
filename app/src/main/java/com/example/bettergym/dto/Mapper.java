@@ -9,7 +9,7 @@ public class Mapper {
 
     public static Ginasio toModel(PlaceGymDTO dto) {
         if (dto == null) return null;
-        return new Ginasio(dto.getId(), dto.getNome(),dto.getLatitude() ,dto.getLongitude(), dto.getRating());
+        return new Ginasio(dto.getId(), dto.getNome(),dto.getLatitude() ,dto.getLongitude(), dto.getRating(), dto.isAbertoAgora());
     }
 
     public static List<Ginasio> toModelList(List<PlaceGymDTO> dtos) {
@@ -20,9 +20,8 @@ public class Mapper {
         return models;
     }
 
-    // Adiciona este método ao teu Mapper.java
-    // Adiciona este método ao teu Mapper.java
-    // Alteração no Mapper: agora recebe também a String id
+
+
     public static Perfil toModel(String id, PerfilDTO dto) {
         if (dto == null) return null;
 

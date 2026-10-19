@@ -1,6 +1,8 @@
-package com.example.bettergym.views; // MUDAR PARA ui
+package com.example.bettergym.views; // Atualizado para a pasta ui
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
@@ -33,6 +36,11 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
     private FusedLocationProviderClient fusedLocationClient;
     private PlacesService placesService;
 
+    // Elementos do Cartão
+    private androidx.cardview.widget.CardView cardDetalhes;
+    private android.widget.TextView txtCardNome, txtCardAberto;
+    private com.google.android.material.button.MaterialButton btnVerDetalhes;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -42,6 +50,12 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Ligar as views do cartão
+        cardDetalhes = view.findViewById(R.id.cardDetalhesGinasio);
+        txtCardNome = view.findViewById(R.id.txtCardNome);
+        txtCardAberto = view.findViewById(R.id.txtCardAberto);
+        btnVerDetalhes = view.findViewById(R.id.btnVerDetalhes);
 
         // 1. Inicializa o GPS e o Serviço
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -61,7 +75,10 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         aplicarEstiloLimpo();
         ajustarEspacamento();
 
-        // 3. Liga o GPS e pede os ginásios ao serviço
+        // 3. Configura os cliques no mapa para o novo Cartão Interativo
+        configurarCliquesMapa();
+
+        // 4. Liga o GPS e pede os ginásios ao serviço
         ativarLocalizacaoECentrar();
     }
 
@@ -78,6 +95,40 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         mMap.setPadding(0, 0, 0, paddingBottom);
     }
 
+    private void configurarCliquesMapa() {
+        // Esconder o cartão ao clicar num sítio vazio do mapa
+        mMap.setOnMapClickListener(latLng -> cardDetalhes.setVisibility(View.GONE));
+
+        // Mostrar o cartão ao clicar num marcador
+        mMap.setOnMarkerClickListener(marker -> {
+            Ginasio ginasio = (Ginasio) marker.getTag(); // Vai buscar o objeto guardado
+
+            if (ginasio != null) {
+                txtCardNome.setText(ginasio.getNome());
+
+                if (ginasio.isAbertoAgora()) {
+                    txtCardAberto.setText("🟢 Aberto agora");
+                    txtCardAberto.setTextColor(Color.parseColor("#4CAF50"));
+                } else {
+                    txtCardAberto.setText("🔴 Fechado");
+                    txtCardAberto.setTextColor(Color.parseColor("#F44336"));
+                }
+
+
+                btnVerDetalhes.setOnClickListener(v -> {
+                    Toast.makeText(requireContext(), "Detalhes do " + ginasio.getNome() + " em breve!", Toast.LENGTH_SHORT).show();
+                });
+
+                cardDetalhes.setVisibility(View.VISIBLE);
+
+                // Centra a câmara no pino quando clicas nele
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+            }
+
+            return true; // IMPORTANTE: TRUE significa que tratamos do clique e o mapa não abre a janela padrão
+        });
+    }
+
     @SuppressLint("MissingPermission")
     private void ativarLocalizacaoECentrar() {
         mMap.setMyLocationEnabled(true);
@@ -88,7 +139,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
                 LatLng minhaPosicao = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(minhaPosicao, 14.5f));
 
-                // 4. O Fragment pede os dados ao Serviço
+                // O Fragment pede os dados ao Serviço
                 placesService.pesquisarGinasiosProximos(minhaPosicao, new PlacesService.OnGymsLoadedListener() {
                     @Override
                     public void onSuccess(List<Ginasio> ginasios) {
@@ -109,7 +160,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    // 5. Método isolado apenas para gerir os marcadores visuais
+    // Método isolado apenas para gerir os marcadores visuais
     private void desenharMarcadores(List<Ginasio> ginasios) {
         if (mMap == null) return;
 
@@ -117,11 +168,16 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
 
         for (Ginasio g : ginasios) {
             LatLng posicao = new LatLng(g.getLatitude(), g.getLongitude());
-            mMap.addMarker(new MarkerOptions()
+
+            // Removido o .title() para evitar que a janela antiga apareça
+            Marker marcador = mMap.addMarker(new MarkerOptions()
                     .position(posicao)
-                    .title(g.getNome())
-                    .snippet("Rating: " + g.getRating()) // Mostra o rating no clique!
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+            // PASSO CRUCIAL: Guarda o objeto Ginásio dentro do marcador
+            if (marcador != null) {
+                marcador.setTag(g);
+            }
         }
     }
 }

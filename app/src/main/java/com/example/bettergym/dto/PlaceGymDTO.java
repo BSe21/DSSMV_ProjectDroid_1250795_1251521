@@ -7,16 +7,19 @@ public class PlaceGymDTO {
     private double longitude;
     private double rating;
 
+    private boolean abertoAgora;
+
     // Construtor vazio (sempre boa prática, especialmente se usares Firebase mais tarde)
     public PlaceGymDTO() {}
 
     // Construtor com os campos todos
-    public PlaceGymDTO(String id, String nome, double latitude, double longitude, double rating) {
+    public PlaceGymDTO(String id, String nome, double latitude, double longitude, double rating, boolean abertoAgora) {
         this.id = id;
         this.nome = nome;
         this.latitude = latitude;
         this.longitude = longitude;
         this.rating = rating;
+        this.abertoAgora = abertoAgora;
     }
 
     // Getters e Setters
@@ -25,6 +28,8 @@ public class PlaceGymDTO {
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
+    public boolean isAbertoAgora() { return abertoAgora; }
+    public void setAbertoAgora(boolean abertoAgora) { this.abertoAgora = abertoAgora; }
 
     public double getLatitude() { return latitude; }
     public void setLatitude(double latitude) { this.latitude = latitude; }

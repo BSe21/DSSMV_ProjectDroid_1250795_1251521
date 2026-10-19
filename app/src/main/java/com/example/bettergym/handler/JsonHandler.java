@@ -29,12 +29,19 @@ public class JsonHandler {
                 lat = jsonChildNode.getJSONObject("location").optDouble("latitude", 0.0);
                 lng = jsonChildNode.getJSONObject("location").optDouble("longitude", 0.0);
             }
-            double rating = jsonChildNode.optDouble("rating", 0.0); // Default to 0.0 if not present
 
-            // Apagas as linhas do rating e do address
+            double rating = jsonChildNode.optDouble("rating", 0.0);
 
-            // Passas apenas os 4 parâmetros que o teu DTO pede
-            list.add(new PlaceGymDTO(id, name, lat, lng, rating));
+            // --- MUDANÇA AQUI: Navegar pelas "caixas" corretas da Google ---
+            boolean isOpenNow = false;
+            if (jsonChildNode.has("regularOpeningHours")) {
+                isOpenNow = jsonChildNode.getJSONObject("regularOpeningHours").optBoolean("openNow", false);
+            } else if (jsonChildNode.has("currentOpeningHours")) {
+                isOpenNow = jsonChildNode.getJSONObject("currentOpeningHours").optBoolean("openNow", false);
+            }
+            // ----------------------------------------------------------------
+
+            list.add(new PlaceGymDTO(id, name, lat, lng, rating, isOpenNow));
         }
         return list;
     }

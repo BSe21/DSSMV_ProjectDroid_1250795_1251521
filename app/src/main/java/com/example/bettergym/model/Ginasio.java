@@ -9,14 +9,17 @@ public class Ginasio implements Serializable {
     private double longitude;
     private double rating;
 
+    private boolean abertoAgora;
+
     public Ginasio() {}
 
-    public Ginasio(String google_place_id, String nome, double latitude, double longitude, double rating) {
+    public Ginasio(String google_place_id, String nome, double latitude, double longitude, double rating, boolean abertoAgora) {
         this.id = google_place_id;
         this.nome = nome;
         this.latitude = latitude;
         this.longitude = longitude;
         this.rating = rating;
+        this.abertoAgora = abertoAgora;
     }
 
     public String getId() { return id; }
@@ -24,7 +27,8 @@ public class Ginasio implements Serializable {
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
-
+    public boolean isAbertoAgora() { return abertoAgora; }
+    public void setAbertoAgora(boolean abertoAgora) { this.abertoAgora = abertoAgora; }
 
     public double getLatitude() { return latitude; }
     public void setLatitude(double latitude) { this.latitude = latitude; }
