@@ -1,6 +1,10 @@
 package com.example.bettergym.handler;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -11,26 +15,23 @@ import java.util.Map;
 public class NetworkHandler {
 
     /**
-     * Faz um pedido HTTP POST genérico para qualquer API.
+     * Faz um pedido HTTP POST genérico (Usado pela API da Google Places).
      */
     public static String post(String urlString, String jsonBody, Map<String, String> headers) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
 
-        // 1. Configurar a ligação
         conexao.setRequestMethod("POST");
-        conexao.setConnectTimeout(10000); // 10 segundos de limite
+        conexao.setConnectTimeout(10000);
         conexao.setReadTimeout(10000);
         conexao.setDoOutput(true);
 
-        // 2. Injetar os Cabeçalhos (Headers) - Ex: API Key
         if (headers != null) {
             for (Map.Entry<String, String> header : headers.entrySet()) {
                 conexao.setRequestProperty(header.getKey(), header.getValue());
             }
         }
 
-        // 3. Enviar o Corpo do Pedido (JSON Body)
         if (jsonBody != null) {
             try (OutputStream os = conexao.getOutputStream()) {
                 byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
@@ -38,13 +39,11 @@ public class NetworkHandler {
             }
         }
 
-        // 4. Verificar se a chamada teve sucesso (Código 200 OK)
         int responseCode = conexao.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new Exception("Erro na ligação HTTP. Código da Google: " + responseCode);
+            throw new Exception("Erro na ligação HTTP. Código: " + responseCode);
         }
 
-        // 5. Ler a resposta da Google e devolver como String
         BufferedReader reader = new BufferedReader(new InputStreamReader(conexao.getInputStream(), StandardCharsets.UTF_8));
         StringBuilder resposta = new StringBuilder();
         String linha;
@@ -57,5 +56,23 @@ public class NetworkHandler {
         conexao.disconnect();
 
         return resposta.toString();
+    }
+
+    /**
+     * Faz o download de uma imagem através de um URL e devolve um Bitmap (Usado no Perfil).
+     */
+    public static Bitmap downloadBitmap(String urlFoto) throws Exception {
+        URL url = new URL(urlFoto);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        // Tempos de espera um pouco maiores para imagens pesadas
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(15000);
+
+        try (InputStream in = conn.getInputStream()) {
+            return BitmapFactory.decodeStream(in);
+        } finally {
+            conn.disconnect();
+        }
     }
 }

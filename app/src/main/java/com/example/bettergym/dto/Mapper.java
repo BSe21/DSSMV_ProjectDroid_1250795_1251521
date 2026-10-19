@@ -1,6 +1,7 @@
 package com.example.bettergym.dto;
 
 import com.example.bettergym.model.Ginasio;
+import com.example.bettergym.model.Perfil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,4 +19,25 @@ public class Mapper {
         }
         return models;
     }
+
+    // Adiciona este método ao teu Mapper.java
+    // Adiciona este método ao teu Mapper.java
+    // Alteração no Mapper: agora recebe também a String id
+    public static Perfil toModel(String id, PerfilDTO dto) {
+        if (dto == null) return null;
+
+        // Passar os dados EXATAMENTE na ordem do construtor:
+        // id, nome, username, email, nascimento, telemovel, foto, registo
+        return new Perfil(
+                id,
+                dto.getNome_completo(),
+                dto.getUsername(),
+                dto.getEmail(),
+                dto.getData_nascimento(),
+                dto.getNumero_telemovel(),
+                dto.getFoto_url(),
+                dto.getData_registo()
+        );
+    }
+
 }
