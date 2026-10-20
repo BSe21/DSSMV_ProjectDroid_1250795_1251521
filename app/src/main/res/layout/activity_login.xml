@@ -9,15 +9,15 @@
         android:padding="32dp"
         tools:context=".views.LoginActivity">
 
-    <!-- Título da App com Tipografia Forte -->
-    <TextView
+    <!-- Logótipo horizontal no cabeçalho do login. -->
+    <ImageView
             android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-black"
-            android:text="BetterGym"
-            android:textColor="@color/primary"
-            android:textSize="44sp"
+            android:layout_width="0dp"
+            android:layout_height="112dp"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bettergym_login_logo"
+            app:layout_constraintWidth_max="320dp"
             app:layout_constraintBottom_toTopOf="@+id/subtitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
