@@ -1,10 +1,13 @@
-package com.example.bettergym.views; // MUDADO PARA ui
+package com.example.bettergym.views; // Mantive o teu nome de package para não dar erro
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -13,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -28,11 +32,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
@@ -42,6 +44,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PlacesService placesService;
     private FusedLocationProviderClient fusedLocationClient;
     private OnBackPressedCallback voltarDoPerfil;
+
+    // Elementos do Cartão
+    private CardView cardDetalhes;
+    private TextView txtCardNome, txtCardAberto;
+    private MaterialButton btnVerDetalhes;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -59,6 +66,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // Ligar as views do cartão aos IDs do teu XML
+        cardDetalhes = findViewById(R.id.cardDetalhesGinasio);
+        txtCardNome = findViewById(R.id.txtCardNome);
+        txtCardAberto = findViewById(R.id.txtCardAberto);
+        btnVerDetalhes = findViewById(R.id.btnVerDetalhes);
 
         // 1. Instancia o Serviço e o Cliente de GPS
         placesService = new PlacesService();
@@ -111,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void mostrarPerfil() {
         findViewById(R.id.containerPerfil).setVisibility(View.VISIBLE);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.containerPerfil, new PerfilFragment()) // Não te esqueças de meter o PerfilFragment na pasta 'ui' também!
+                .replace(R.id.containerPerfil, new PerfilFragment())
                 .commit();
         voltarDoPerfil.setEnabled(true);
     }
@@ -133,6 +146,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         aplicarEstiloLimpo();
         ajustarEspacamento();
 
+        // Ligar a lógica do cartão interativo ao mapa!
+        configurarCliquesMapa();
+
         verificarPermissaoGPS();
     }
 
@@ -145,8 +161,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void ajustarEspacamento() {
+        // Corrigido o erro de sintaxe do asterisco
         int paddingBottom = (int) (65 * getResources().getDisplayMetrics().density);
         mMap.setPadding(0, 0, 0, paddingBottom);
+    }
+
+    private void configurarCliquesMapa() {
+        // Esconder o cartão ao clicar num sítio vazio do mapa
+        mMap.setOnMapClickListener(latLng -> cardDetalhes.setVisibility(View.GONE));
+
+        // Mostrar o cartão ao clicar num marcador
+        mMap.setOnMarkerClickListener(marker -> {
+            Ginasio ginasio = (Ginasio) marker.getTag(); // Vai buscar o objeto guardado
+
+            if (ginasio != null) {
+                txtCardNome.setText(ginasio.getNome());
+
+                if (ginasio.isAbertoAgora()) {
+                    txtCardAberto.setText("🟢 Aberto agora");
+                    txtCardAberto.setTextColor(Color.parseColor("#4CAF50"));
+                } else {
+                    txtCardAberto.setText("🔴 Fechado");
+                    txtCardAberto.setTextColor(Color.parseColor("#F44336"));
+                }
+
+                // O botão mostra um Toast porque a Activity de detalhes ainda não existe
+                btnVerDetalhes.setOnClickListener(v -> {
+                    Toast.makeText(MainActivity.this, "Detalhes do " + ginasio.getNome() + " em breve!", Toast.LENGTH_SHORT).show();
+                });
+
+                cardDetalhes.setVisibility(View.VISIBLE);
+
+                // Centra a câmara no pino quando clicas nele
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+            }
+
+            return true; // TRUE significa que tratamos do clique e a janela antiga não abre
+        });
     }
 
     private void verificarPermissaoGPS() {
@@ -170,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 LatLng minhaPosicao = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(minhaPosicao, 14.5f));
 
-                // 4. Pede os dados ao PlacesService (agora focado apenas na API)
+                // 4. Pede os dados ao PlacesService
                 placesService.pesquisarGinasiosProximos(minhaPosicao, new PlacesService.OnGymsLoadedListener() {
                     @Override
                     public void onSuccess(List<Ginasio> ginasios) {
@@ -194,11 +245,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         for (Ginasio g : ginasios) {
             LatLng posicao = new LatLng(g.getLatitude(), g.getLongitude());
-            mMap.addMarker(new MarkerOptions()
+
+            Marker marcador = mMap.addMarker(new MarkerOptions()
                     .position(posicao)
-                    .title(g.getNome())
-                    .snippet("Rating: " + g.getRating())
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+            if (marcador != null) {
+                marcador.setTag(g);
+            }
         }
     }
 }
