@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">BetterGym</string>
+    <string name="loading_logo">Logótipo BetterGym</string>
+    <string name="loading_map">A preparar o mapa…</string>
+    <string name="loading_location">A obter a tua localização…</string>
+    <string name="loading_search">A pesquisar ginásios próximos…</string>
+    <string name="loading_received">Dados recebidos. A organizar os ginásios…</string>
+    <string name="loading_markers">A adicionar os ginásios ao mapa…</string>
+    <string name="loading_done">Tudo pronto!</string>
+    <string name="loading_initial_percent">0%</string>
+    <string name="loading_percent">%1$d%%</string>
+    <string name="loading_retry">Tentar novamente</string>
+    <string name="loading_continue">Continuar sem ginásios</string>
+    <string name="loading_permission">Precisamos da permissão de localização para procurar ginásios próximos.</string>
+    <string name="loading_no_location">Não foi possível obter a localização. Ativa a localização e tenta novamente.</string>
+    <string name="loading_network_error">Não foi possível carregar os ginásios. Verifica a ligação e tenta novamente.</string>
+    <string name="loading_timeout">O carregamento demorou demasiado. Verifica a ligação e tenta novamente.</string>
 </resources>

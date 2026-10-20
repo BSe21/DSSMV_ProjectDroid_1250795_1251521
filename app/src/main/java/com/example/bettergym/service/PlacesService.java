@@ -17,6 +17,8 @@ public class PlacesService {
     private static final String URL = "https://places.googleapis.com/v1/places:searchNearby";
 
     public interface OnGymsLoadedListener {
+        // Chamado pela worker thread; a View encaminha as atualizações para a UI Thread.
+        default void onProgress(int percentagem) {}
         void onSuccess(List<Ginasio> ginasios);
         void onError(Exception e);
     }
@@ -28,7 +30,7 @@ public class PlacesService {
                 headers.put("Content-Type", "application/json");
                 headers.put("X-Goog-Api-Key", GOOGLE_PLACES_API_KEY);
                 // MUDANÇA AQUI: Usar regularOpeningHours em vez de currentOpeningHours para evitar o 503
-                headers.put("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount,places.regularOpeningHours.openNow");
+                headers.put("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount,places.regularOpeningHours.openNow,places.photos");
 
                 String jsonInputString = "{"
                         + "\"includedTypes\": [\"gym\"],"
@@ -45,8 +47,10 @@ public class PlacesService {
                         + "}";
 
                 String respostaJson = NetworkHandler.post(URL, jsonInputString, headers);
+                listener.onProgress(70);
                 List<PlaceGymDTO> dtos = JsonHandler.deSerializeJson2ListPlaceGymDTO(respostaJson);
                 List<Ginasio> ginasios = Mapper.toModelList(dtos);
+                listener.onProgress(85);
 
                 listener.onSuccess(ginasios);
 
@@ -54,6 +58,15 @@ public class PlacesService {
                 android.util.Log.e("PLACES_ERRO", "Erro no serviço: " + e.getMessage());
                 listener.onError(e);
             }
-        }).start();
+        }, "BetterGym-Places").start();
+    }
+
+    /**
+     * Constrói o endpoint Place Photos (New) a partir do nome devolvido pelo Nearby Search.
+     */
+    public static String obterUrlFoto(String referenciaFoto) {
+        if (referenciaFoto == null || referenciaFoto.isEmpty()) return null;
+        return "https://places.googleapis.com/v1/" + referenciaFoto
+                + "/media?maxWidthPx=1200&key=" + GOOGLE_PLACES_API_KEY;
     }
 }

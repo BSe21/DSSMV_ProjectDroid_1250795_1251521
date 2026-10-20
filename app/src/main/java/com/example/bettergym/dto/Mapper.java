@@ -9,7 +9,17 @@ public class Mapper {
 
     public static Ginasio toModel(PlaceGymDTO dto) {
         if (dto == null) return null;
-        return new Ginasio(dto.getId(), dto.getNome(),dto.getLatitude() ,dto.getLongitude(), dto.getRating(), dto.isAbertoAgora());
+        return new Ginasio(
+                dto.getId(),
+                dto.getNome(),
+                dto.getLatitude(),
+                dto.getLongitude(),
+                dto.getRating(),
+                dto.isAbertoAgora(),
+                dto.getMorada(),
+                dto.getNumeroAvaliacoes(),
+                dto.getReferenciaFoto()
+        );
     }
 
     public static List<Ginasio> toModelList(List<PlaceGymDTO> dtos) {

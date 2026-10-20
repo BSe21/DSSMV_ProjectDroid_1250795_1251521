@@ -6,8 +6,10 @@ public class PlaceGymDTO {
     private double latitude;
     private double longitude;
     private double rating;
-
     private boolean abertoAgora;
+    private String morada;
+    private int numeroAvaliacoes;
+    private String referenciaFoto;
 
     // Construtor vazio (sempre boa prática, especialmente se usares Firebase mais tarde)
     public PlaceGymDTO() {}
@@ -20,6 +22,14 @@ public class PlaceGymDTO {
         this.longitude = longitude;
         this.rating = rating;
         this.abertoAgora = abertoAgora;
+    }
+
+    public PlaceGymDTO(String id, String nome, double latitude, double longitude, double rating,
+                       boolean abertoAgora, String morada, int numeroAvaliacoes, String referenciaFoto) {
+        this(id, nome, latitude, longitude, rating, abertoAgora);
+        this.morada = morada;
+        this.numeroAvaliacoes = numeroAvaliacoes;
+        this.referenciaFoto = referenciaFoto;
     }
 
     // Getters e Setters
@@ -39,4 +49,13 @@ public class PlaceGymDTO {
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public String getMorada() { return morada; }
+    public void setMorada(String morada) { this.morada = morada; }
+
+    public int getNumeroAvaliacoes() { return numeroAvaliacoes; }
+    public void setNumeroAvaliacoes(int numeroAvaliacoes) { this.numeroAvaliacoes = numeroAvaliacoes; }
+
+    public String getReferenciaFoto() { return referenciaFoto; }
+    public void setReferenciaFoto(String referenciaFoto) { this.referenciaFoto = referenciaFoto; }
 }

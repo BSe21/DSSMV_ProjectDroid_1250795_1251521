@@ -31,6 +31,12 @@ public class JsonHandler {
             }
 
             double rating = jsonChildNode.optDouble("rating", 0.0);
+            String morada = jsonChildNode.optString("formattedAddress", "");
+            int numeroAvaliacoes = jsonChildNode.optInt("userRatingCount", 0);
+            String referenciaFoto = "";
+            if (jsonChildNode.has("photos") && jsonChildNode.getJSONArray("photos").length() > 0) {
+                referenciaFoto = jsonChildNode.getJSONArray("photos").getJSONObject(0).optString("name", "");
+            }
 
             // --- MUDANÇA AQUI: Navegar pelas "caixas" corretas da Google ---
             boolean isOpenNow = false;
@@ -41,7 +47,7 @@ public class JsonHandler {
             }
             // ----------------------------------------------------------------
 
-            list.add(new PlaceGymDTO(id, name, lat, lng, rating, isOpenNow));
+            list.add(new PlaceGymDTO(id, name, lat, lng, rating, isOpenNow, morada, numeroAvaliacoes, referenciaFoto));
         }
         return list;
     }

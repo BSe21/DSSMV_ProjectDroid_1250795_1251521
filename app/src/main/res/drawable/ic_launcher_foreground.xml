@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Amplia o símbolo da imagem original, mantendo-o na zona segura do ícone adaptativo. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:width="200dp" android:height="200dp" android:gravity="center">
+        <bitmap android:src="@drawable/bettergym_icon_source" android:gravity="fill" android:filter="true" />
+    </item>
+</layer-list>

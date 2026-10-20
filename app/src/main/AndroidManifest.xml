@@ -10,11 +10,15 @@
             android:allowBackup="true"
             android:dataExtractionRules="@xml/data_extraction_rules"
             android:fullBackupContent="@xml/backup_rules"
-            android:icon="@android:drawable/sym_def_app_icon"
+            android:icon="@mipmap/ic_launcher"
             android:label="BetterGym"
-            android:roundIcon="@android:drawable/sym_def_app_icon"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.BetterGym" >
+
+        <activity
+                android:name=".views.DetalheGinasioActivity"
+                android:exported="false" />
 
         <!-- Chave de API do Google Maps Platform -->
         <meta-data
