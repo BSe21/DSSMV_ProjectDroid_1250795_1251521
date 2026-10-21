@@ -56,7 +56,6 @@ dependencies {
     implementation("androidx.activity:activity:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.2")
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth:25.0.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
