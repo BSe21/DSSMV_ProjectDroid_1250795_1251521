@@ -22,11 +22,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        val supabaseUrl = project.findProperty("SUPABASE_URL") ?: ""
-        val supabaseKey = project.findProperty("SUPABASE_KEY") ?: ""
-
-        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
-        buildConfigField("String", "SUPABASE_KEY", "\"$supabaseKey\"")
     }
 
     buildTypes {
