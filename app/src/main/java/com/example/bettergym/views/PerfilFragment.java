@@ -53,6 +53,11 @@ public class PerfilFragment extends Fragment {
         inicializarViews(view);
 
         btnLogout.setOnClickListener(v -> terminarSessao());
+        view.findViewById(R.id.btnAlterarPassword).setOnClickListener(v -> {
+            if (getChildFragmentManager().findFragmentByTag("alterar_password") == null) {
+                new AlterarPasswordDialogFragment().show(getChildFragmentManager(), "alterar_password");
+            }
+        });
 
         // 2. Pede os dados ao Serviço (o serviço trata do DTO e do Mapper nos bastidores)
         perfilService.carregarPerfil(uid, new PerfilService.PerfilCallback() {

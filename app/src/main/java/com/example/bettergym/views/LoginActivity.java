@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         // Ação do botão de login
         btnLogin.setOnClickListener(v -> {
             String email = editEmail.getText().toString().trim();
-            String password = editPassword.getText().toString().trim();
+            String password = editPassword.getText().toString();
 
             btnLogin.setEnabled(false);
             btnLogin.setText("A entrar...");

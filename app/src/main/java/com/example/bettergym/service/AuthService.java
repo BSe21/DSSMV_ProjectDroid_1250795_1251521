@@ -1,6 +1,13 @@
 package com.example.bettergym.service;
 
 import android.util.Patterns;
+import com.google.firebase.FirebaseNetworkException;
+import com.google.firebase.FirebaseTooManyRequestsException;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.example.bettergym.helper.PasswordValidator;
 
 import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.model.Perfil;
@@ -22,6 +29,52 @@ public class AuthService {
     public interface AuthCallback {
         void onSucesso(String mensagem);
         void onErro(String erro);
+    }
+
+    public void alterarPalavraPasse(String atual, String nova, String confirmacao, AuthCallback callback) {
+        String erroValidacao = PasswordValidator.validarAlteracao(atual, nova, confirmacao);
+        if (erroValidacao != null) {
+            callback.onErro(erroValidacao);
+            return;
+        }
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null || user.getEmail() == null) {
+            callback.onErro("A sessão expirou. Volta a iniciar sessão.");
+            return;
+        }
+        // O SDK executa os pedidos de rede de forma assíncrona.
+        // A palavra-passe atual é confirmada pelo Firebase, nunca pelo Firestore.
+        user.reauthenticate(EmailAuthProvider.getCredential(user.getEmail(), atual))
+                .addOnSuccessListener(ignored -> {
+                    FirebaseUser current = mAuth.getCurrentUser();
+                    if (current == null || !user.getUid().equals(current.getUid())) {
+                        callback.onErro("A sessão mudou. Volta a iniciar sessão.");
+                        return;
+                    }
+                    user.updatePassword(nova)
+                            .addOnSuccessListener(result -> callback.onSucesso("Palavra-passe alterada com sucesso!"))
+                            .addOnFailureListener(e -> callback.onErro(mensagemAlteracao(e, false)));
+                })
+                .addOnFailureListener(e -> callback.onErro(mensagemAlteracao(e, true)));
+    }
+
+    private String mensagemAlteracao(Exception erro, boolean confirmarAtual) {
+        if (erro instanceof FirebaseNetworkException) {
+            return "Sem ligação ao servidor. Verifica a Internet e tenta novamente.";
+        }
+        if (erro instanceof FirebaseTooManyRequestsException) {
+            return "Demasiadas tentativas. Aguarda um pouco e tenta novamente.";
+        }
+        if (erro instanceof FirebaseAuthInvalidUserException) {
+            return "A conta já não está disponível. Volta a iniciar sessão.";
+        }
+        if (erro instanceof FirebaseAuthWeakPasswordException) {
+            return "A nova palavra-passe não cumpre os requisitos de segurança. Escolhe uma mais forte.";
+        }
+        if (confirmarAtual && erro instanceof FirebaseAuthInvalidCredentialsException) {
+            return "A palavra-passe atual está incorreta.";
+        }
+        return "Não foi possível alterar a palavra-passe. Tenta novamente.";
     }
 
     public void registarNovaConta(String nome, String username, String dataNascimento,

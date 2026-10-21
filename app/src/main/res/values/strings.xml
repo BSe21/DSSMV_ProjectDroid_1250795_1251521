@@ -15,4 +15,13 @@
     <string name="loading_no_location">Não foi possível obter a localização. Ativa a localização e tenta novamente.</string>
     <string name="loading_network_error">Não foi possível carregar os ginásios. Verifica a ligação e tenta novamente.</string>
     <string name="loading_timeout">O carregamento demorou demasiado. Verifica a ligação e tenta novamente.</string>
+    <string name="password_change_title">Alterar palavra-passe</string>
+    <string name="password_change_description">Confirma a tua palavra-passe atual e escolhe uma nova para a tua conta.</string>
+    <string name="password_current">Palavra-passe atual</string>
+    <string name="password_new">Nova palavra-passe</string>
+    <string name="password_confirm">Confirmar nova palavra-passe</string>
+    <string name="password_requirements">Utiliza pelo menos 6 caracteres.</string>
+    <string name="password_save">Guardar</string>
+    <string name="password_cancel">Cancelar</string>
+    <string name="password_saving">A guardar…</string>
 </resources>
