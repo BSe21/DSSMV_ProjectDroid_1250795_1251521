@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bettergym.R;
-import com.example.bettergym.controllers.authController;
 import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.exceptions.DuplicatedDataException;
 import com.example.bettergym.exceptions.DataConsistencyException;
