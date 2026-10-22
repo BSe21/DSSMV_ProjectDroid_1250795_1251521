@@ -7,4 +7,5 @@
     <color name="secondary">#98CF27</color>
     <color name="estado_aberto">#2E7D32</color>
     <color name="estado_fechado">#C62828</color>
+    <color name="favorito_amarelo">#FFC107</color>
 </resources>

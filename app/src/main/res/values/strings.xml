@@ -24,4 +24,17 @@
     <string name="password_save">Guardar</string>
     <string name="password_cancel">Cancelar</string>
     <string name="password_saving">A guardar…</string>
+    <string name="favorites_title">Favoritos</string>
+    <string name="favorites_subtitle">Os teus ginásios guardados, num só lugar.</string>
+    <string name="favorites_add">Adicionar aos favoritos</string>
+    <string name="favorites_remove">Remover dos favoritos</string>
+    <string name="favorites_remove_named">Remover %1$s dos favoritos</string>
+    <string name="favorites_empty_title">Ainda não tens favoritos</string>
+    <string name="favorites_empty_description">Abre a ficha de um ginásio e toca na estrela para o guardar aqui.</string>
+    <string name="favorites_loading">A carregar favoritos…</string>
+    <string name="favorites_error">Não foi possível carregar os favoritos. Verifica a ligação e tenta novamente.</string>
+    <string name="favorites_write_error">Não foi possível atualizar os favoritos. Tenta novamente.</string>
+    <string name="favorites_added">Ginásio adicionado aos favoritos.</string>
+    <string name="favorites_removed">Ginásio removido dos favoritos.</string>
+    <string name="favorites_address_unavailable">Morada não disponível</string>
 </resources>

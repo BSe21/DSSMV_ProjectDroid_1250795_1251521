@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#FAFAFA">
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginStart="24dp" android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp" android:text="@string/favorites_title"
+        android:textColor="@color/primary" android:textSize="28sp" android:textStyle="bold" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginStart="24dp" android:layout_marginEnd="24dp" android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp" android:text="@string/favorites_subtitle"
+        android:textColor="#52636E" android:textSize="15sp" />
+
+    <ListView android:id="@+id/listaFavoritos"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:clipToPadding="false"
+        android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingBottom="16dp"
+        android:divider="@android:color/transparent" android:dividerHeight="12dp"
+        android:visibility="gone" />
+
+    <LinearLayout android:id="@+id/estadoFavoritos"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:gravity="center" android:padding="32dp"
+        android:orientation="vertical">
+        <ProgressBar android:id="@+id/progressoFavoritos"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:indeterminateTint="@color/primary" />
+        <TextView android:id="@+id/txtEstadoFavoritos"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" android:gravity="center"
+            android:text="@string/favorites_loading" android:textColor="@color/primary"
+            android:textSize="20sp" android:textStyle="bold" />
+        <TextView android:id="@+id/txtAjudaFavoritos"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" android:gravity="center"
+            android:text="@string/favorites_empty_description" android:textColor="#52636E"
+            android:textSize="16sp" android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnRepetirFavoritos"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" android:text="@string/loading_retry"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

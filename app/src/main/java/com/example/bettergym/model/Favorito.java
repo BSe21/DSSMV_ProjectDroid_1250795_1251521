@@ -5,6 +5,7 @@ public class Favorito {
     private String user_id;
     private String ginasio_id;
     private String data_adicionado;
+    private Ginasio ginasio;
 
     public Favorito() {}
 
@@ -26,4 +27,7 @@ public class Favorito {
 
     public String getData_adicionado() { return data_adicionado; }
     public void setData_adicionado(String data_adicionado) { this.data_adicionado = data_adicionado; }
+
+    public Ginasio getGinasio() { return ginasio; }
+    public void setGinasio(Ginasio ginasio) { this.ginasio = ginasio; }
 }

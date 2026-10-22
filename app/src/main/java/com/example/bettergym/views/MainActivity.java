@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private PlacesService placesService;
     private FusedLocationProviderClient fusedLocationClient;
-    private OnBackPressedCallback voltarDoPerfil;
+    private OnBackPressedCallback voltarDoConteudo;
     private View ecraCarregamento;
     private TextView txtEtapa, txtPercentagem;
     private LinearProgressIndicator barraCarregamento;
@@ -110,51 +110,63 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // 3. Barra de navegação inferior
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 
-        voltarDoPerfil = new OnBackPressedCallback(false) {
+        voltarDoConteudo = new OnBackPressedCallback(false) {
             @Override
             public void handleOnBackPressed() {
-                esconderPerfil();
+                esconderConteudo();
                 bottomNav.setSelectedItemId(R.id.nav_mapa);
             }
         };
-        getOnBackPressedDispatcher().addCallback(this, voltarDoPerfil);
+        getOnBackPressedDispatcher().addCallback(this, voltarDoConteudo);
 
         bottomNav.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_perfil) {
-                mostrarPerfil();
+                mostrarConteudo(new PerfilFragment());
                 return true;
             }
 
-            esconderPerfil();
+            if (itemId == R.id.nav_favoritos) {
+                mostrarConteudo(new FavoritosFragment());
+                return true;
+            }
+
+            esconderConteudo();
             if (itemId == R.id.nav_mapa) {
                 return true;
             } else if (itemId == R.id.nav_ginasios) {
                 return true;
-            } else if (itemId == R.id.nav_favoritos) {
-                return true;
             }
             return false;
         });
+        if (savedInstanceState != null) {
+            bottomNav.setSelectedItemId(savedInstanceState.getInt("separador", R.id.nav_mapa));
+        }
     }
 
-    private void mostrarPerfil() {
-        // O cartão pertence ao mapa e não deve ficar visível por baixo do perfil.
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt("separador", ((BottomNavigationView) findViewById(R.id.bottomNavigation)).getSelectedItemId());
+        super.onSaveInstanceState(outState);
+    }
+
+    private void mostrarConteudo(Fragment fragment) {
+        // O contentor é partilhado pelos ecrãs de perfil e favoritos.
         cardDetalhes.setVisibility(View.GONE);
         findViewById(R.id.containerPerfil).setVisibility(View.VISIBLE);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.containerPerfil, new PerfilFragment())
+                .replace(R.id.containerPerfil, fragment)
                 .commit();
-        voltarDoPerfil.setEnabled(true);
+        voltarDoConteudo.setEnabled(true);
     }
 
-    private void esconderPerfil() {
+    private void esconderConteudo() {
         Fragment atual = getSupportFragmentManager().findFragmentById(R.id.containerPerfil);
         if (atual != null) {
             getSupportFragmentManager().beginTransaction().remove(atual).commit();
         }
         findViewById(R.id.containerPerfil).setVisibility(View.GONE);
-        voltarDoPerfil.setEnabled(false);
+        voltarDoConteudo.setEnabled(false);
     }
 
     @Override
