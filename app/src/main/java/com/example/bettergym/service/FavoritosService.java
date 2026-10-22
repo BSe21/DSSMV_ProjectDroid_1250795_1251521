@@ -1,6 +1,8 @@
 package com.example.bettergym.service;
 
 import com.example.bettergym.model.Favorito;
+import com.example.bettergym.dto.FavoritoDTO;
+import com.example.bettergym.dto.Mapper;
 import com.example.bettergym.model.Ginasio;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -76,7 +78,8 @@ public class FavoritosService {
                         List<Favorito> favoritos = new ArrayList<>();
                         try {
                             for (com.google.firebase.firestore.DocumentSnapshot doc : snapshot.getDocuments()) {
-                                Favorito favorito = doc.toObject(Favorito.class);
+                                FavoritoDTO dto = doc.toObject(FavoritoDTO.class);
+                                Favorito favorito = Mapper.toModel(doc.getId(), dto);
                                 if (favorito != null && favorito.getGinasio() != null) favoritos.add(favorito);
                             }
                             favoritos.sort((a, b) -> {
@@ -103,7 +106,8 @@ public class FavoritosService {
             iso.setTimeZone(TimeZone.getTimeZone("UTC"));
             Favorito favorito = new Favorito(ref.getId(), uid, ginasio.getId(), iso.format(new Date()));
             favorito.setGinasio(ginasio);
-            ref.set(favorito).addOnSuccessListener(ignored -> callback.onSucesso())
+            FavoritoDTO dto = Mapper.toDTO(favorito);
+            ref.set(dto).addOnSuccessListener(ignored -> callback.onSucesso())
                     .addOnFailureListener(callback::onErro);
         } catch (Exception e) {
             callback.onErro(e);

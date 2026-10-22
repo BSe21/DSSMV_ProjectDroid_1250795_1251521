@@ -15,11 +15,16 @@ import java.util.Set;
 
 class FavoritosAdapter extends BaseAdapter {
     interface RemoverListener { void remover(Favorito favorito); }
+    interface AbrirListener { void abrir(Favorito favorito); }
     private final List<Favorito> favoritos = new ArrayList<>();
     private final Set<String> aRemover = new HashSet<>();
     private final RemoverListener listener;
+    private final AbrirListener abrirListener;
 
-    FavoritosAdapter(RemoverListener listener) { this.listener = listener; }
+    FavoritosAdapter(RemoverListener listener, AbrirListener abrirListener) {
+        this.listener = listener;
+        this.abrirListener = abrirListener;
+    }
 
     void atualizar(List<Favorito> lista) {
         favoritos.clear();
@@ -43,6 +48,7 @@ class FavoritosAdapter extends BaseAdapter {
                 .inflate(R.layout.item_favorito, parent, false) : convertView;
         Favorito favorito = getItem(position);
         Ginasio ginasio = favorito.getGinasio();
+        row.setOnClickListener(v -> abrirListener.abrir(favorito));
         ((TextView) row.findViewById(R.id.txtFavoritoNome)).setText(ginasio.getNome());
         TextView morada = row.findViewById(R.id.txtFavoritoMorada);
         morada.setText(ginasio.getMorada() == null || ginasio.getMorada().isEmpty()

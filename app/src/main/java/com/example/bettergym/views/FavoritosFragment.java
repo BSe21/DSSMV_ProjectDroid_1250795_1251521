@@ -32,14 +32,9 @@ public class FavoritosFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         service = new FavoritosService();
-        adapter = new FavoritosAdapter(this::remover);
+        adapter = new FavoritosAdapter(this::remover, this::abrirDetalhes);
         ListView lista = view.findViewById(R.id.listaFavoritos);
         lista.setAdapter(adapter);
-        lista.setOnItemClickListener((parent, row, position, id) -> {
-            Intent intent = new Intent(requireContext(), DetalheGinasioActivity.class);
-            intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO, adapter.getItem(position).getGinasio());
-            startActivity(intent);
-        });
         view.findViewById(R.id.btnRepetirFavoritos).setOnClickListener(v -> carregar());
     }
 
@@ -79,6 +74,12 @@ public class FavoritosFragment extends Fragment {
         view.findViewById(R.id.progressoFavoritos).setVisibility(carregar ? View.VISIBLE : View.GONE);
         view.findViewById(R.id.txtAjudaFavoritos).setVisibility(vazio ? View.VISIBLE : View.GONE);
         view.findViewById(R.id.btnRepetirFavoritos).setVisibility(erro ? View.VISIBLE : View.GONE);
+    }
+
+    private void abrirDetalhes(Favorito favorito) {
+        Intent intent = new Intent(requireContext(), DetalheGinasioActivity.class);
+        intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO, favorito.getGinasio());
+        startActivity(intent);
     }
 
     private void remover(Favorito favorito) {

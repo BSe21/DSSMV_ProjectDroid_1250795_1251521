@@ -1,6 +1,7 @@
 package com.example.bettergym.dto;
 
 import com.example.bettergym.model.Ginasio;
+import com.example.bettergym.model.Favorito;
 import com.example.bettergym.model.Perfil;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,32 @@ public class Mapper {
                 dto.getFoto_url(),
                 dto.getData_registo()
         );
+    }
+
+    public static Favorito toModel(String id, FavoritoDTO dto) {
+        if (dto == null) return null;
+        Favorito favorito = new Favorito(id, dto.getUser_id(), dto.getGinasio_id(),
+                dto.getData_adicionado());
+        favorito.setGinasio(toModel(dto.getGinasio()));
+        return favorito;
+    }
+
+    public static PlaceGymDTO toDTO(Ginasio ginasio) {
+        if (ginasio == null) return null;
+        return new PlaceGymDTO(ginasio.getId(), ginasio.getNome(), ginasio.getLatitude(),
+                ginasio.getLongitude(), ginasio.getRating(), ginasio.isAbertoAgora(),
+                ginasio.getMorada(), ginasio.getNumeroAvaliacoes(), ginasio.getReferenciaFoto());
+    }
+
+    public static FavoritoDTO toDTO(Favorito favorito) {
+        if (favorito == null) return null;
+        FavoritoDTO dto = new FavoritoDTO();
+        dto.setId(favorito.getId());
+        dto.setUser_id(favorito.getUser_id());
+        dto.setGinasio_id(favorito.getGinasio_id());
+        dto.setData_adicionado(favorito.getData_adicionado());
+        dto.setGinasio(toDTO(favorito.getGinasio()));
+        return dto;
     }
 
 }
