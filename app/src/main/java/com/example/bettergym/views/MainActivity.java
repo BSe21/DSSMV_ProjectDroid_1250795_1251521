@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Abre a ficha completa do ginásio selecionado.
                 btnVerDetalhes.setOnClickListener(v -> {
                     Intent intent = new Intent(MainActivity.this, DetalheGinasioActivity.class);
-                    intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO, ginasio);
+                    intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO_ID, ginasio.getId());
                     startActivity(intent);
                 });
 

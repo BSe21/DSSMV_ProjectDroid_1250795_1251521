@@ -20,20 +20,29 @@ import com.example.bettergym.model.Ginasio;
 import com.example.bettergym.service.PlacesService;
 import com.google.android.material.button.MaterialButton;
 
+import com.example.bettergym.model.Avaliacao;
+
+
+import java.util.List;
 import java.util.Locale;
+import android.widget.ListView;
+import android.util.Log;
 
 public class DetalheGinasioActivity extends AppCompatActivity {
 
-    public static final String EXTRA_GINASIO = "extra_ginasio";
+    public static final String EXTRA_GINASIO_ID = "extra_ginasio";
+
+
 
     private ImageView imgGinasio;
     private TextView txtSemFoto;
     private AppCompatImageButton btnFavorito;
     private Ginasio ginasio;
     private FavoritosService favoritosService;
-    private ListenerRegistration observacaoFavorito;
+    private PlacesService placesService;
     private boolean favorito, estadoConhecido, aGuardar;
     private Snackbar erroFavorito;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,48 +54,89 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         MaterialButton btnVoltar = findViewById(R.id.btnVoltar);
         btnVoltar.setOnClickListener(v -> finish());
 
-        ginasio = (Ginasio) getIntent().getSerializableExtra(EXTRA_GINASIO);
-        if (ginasio == null) {
-            finish();
-            return;
-        }
-
         favoritosService = new FavoritosService();
+        placesService = new PlacesService();
         btnFavorito = findViewById(R.id.btnFavorito);
         btnFavorito.setOnClickListener(v -> alternarFavorito());
-        preencherDados(ginasio);
+
+        // Apanhar o ID diretamente do Intent
+        String ginasioId = getIntent().getStringExtra(EXTRA_GINASIO_ID);
+
+        // Se temos ID, vamos SEMPRE à Google buscar os dados atualizados (incluindo as reviews)
+        if (ginasioId != null && !ginasioId.isEmpty()) {
+            carregarDetalhesDaGoogle(ginasioId);
+        } else {
+            // Se não chegou ID nenhum, avisa e fecha
+            Toast.makeText(this, "Erro: ID do ginásio não encontrado.", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
+    private void carregarDetalhesDaGoogle(String placeId) {
+
+        placesService.obterDetalhesGinasio(placeId, new PlacesService.OnGymDetailsLoadedListener() {
+
+
+            @Override
+            public void onSuccess(Ginasio ginasioReal) {
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    ginasio = ginasioReal;
+                    preencherDados(ginasio);
+                    // Assim que os dados chegam, verifica o estado do favorito
+                    observarFavorito();
+                });
+            }
+
+            @Override
+            public void onError(Exception erro) {
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    Toast.makeText(DetalheGinasioActivity.this, "Erro ao carregar detalhes.", Toast.LENGTH_SHORT).show();
+                    finish();
+                });
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (ginasio != null) observarFavorito();
+
     }
 
     private void observarFavorito() {
-        if (observacaoFavorito != null) observacaoFavorito.remove();
+        // APAGADO: if (observacaoFavorito != null) observacaoFavorito.remove();
         estadoConhecido = false;
         atualizarEstrela();
-        observacaoFavorito = favoritosService.observarEstado(ginasio.getId(),
+
+        // MUDOU PARA verificarEstado E SEM VARIÁVEL
+        favoritosService.verificarEstado(ginasio.getId(),
                 new FavoritosService.EstadoCallback() {
                     @Override
                     public void onResultado(boolean guardado) {
-                        if (isFinishing() || isDestroyed()) return;
-                        favorito = guardado;
-                        estadoConhecido = true;
-                        if (erroFavorito != null) erroFavorito.dismiss();
-                        atualizarEstrela();
+                        // ENVOLVER COM runOnUiThread
+                        runOnUiThread(() -> {
+                            if (isFinishing() || isDestroyed()) return;
+                            favorito = guardado;
+                            estadoConhecido = true;
+                            if (erroFavorito != null) erroFavorito.dismiss();
+                            atualizarEstrela();
+                        });
                     }
 
                     @Override
                     public void onErro(Exception erro) {
-                        if (isFinishing() || isDestroyed()) return;
-                        estadoConhecido = false;
-                        atualizarEstrela();
-                        erroFavorito = Snackbar.make(btnFavorito, R.string.favorites_error,
-                                Snackbar.LENGTH_INDEFINITE)
-                                .setAction(R.string.loading_retry, v -> observarFavorito());
-                        erroFavorito.show();
+                        // ENVOLVER COM runOnUiThread
+                        runOnUiThread(() -> {
+                            if (isFinishing() || isDestroyed()) return;
+                            estadoConhecido = false;
+                            atualizarEstrela();
+                            erroFavorito = Snackbar.make(btnFavorito, R.string.favorites_error,
+                                            Snackbar.LENGTH_INDEFINITE)
+                                    .setAction(R.string.loading_retry, v -> observarFavorito());
+                            erroFavorito.show();
+                        });
                     }
                 });
     }
@@ -99,20 +149,30 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         FavoritosService.EscritaCallback callback = new FavoritosService.EscritaCallback() {
             @Override
             public void onSucesso() {
-                aGuardar = false;
-                if (isFinishing() || isDestroyed()) return;
-                atualizarEstrela();
-                Toast.makeText(DetalheGinasioActivity.this, adicionar
-                        ? R.string.favorites_added : R.string.favorites_removed, Toast.LENGTH_SHORT).show();
+                // ENVOLVER COM runOnUiThread
+                runOnUiThread(() -> {
+                    aGuardar = false;
+                    if (isFinishing() || isDestroyed()) return;
+
+                    // NOVA LINHA CRUCIAL (Como não há escuta em tempo real, atualizamos manualmente)
+                    favorito = adicionar;
+
+                    atualizarEstrela();
+                    Toast.makeText(DetalheGinasioActivity.this, adicionar
+                            ? R.string.favorites_added : R.string.favorites_removed, Toast.LENGTH_SHORT).show();
+                });
             }
 
             @Override
             public void onErro(Exception erro) {
-                aGuardar = false;
-                if (isFinishing() || isDestroyed()) return;
-                atualizarEstrela();
-                Toast.makeText(DetalheGinasioActivity.this,
-                        R.string.favorites_write_error, Toast.LENGTH_LONG).show();
+                // ENVOLVER COM runOnUiThread
+                runOnUiThread(() -> {
+                    aGuardar = false;
+                    if (isFinishing() || isDestroyed()) return;
+                    atualizarEstrela();
+                    Toast.makeText(DetalheGinasioActivity.this,
+                            R.string.favorites_write_error, Toast.LENGTH_LONG).show();
+                });
             }
         };
         if (adicionar) favoritosService.guardar(ginasio, callback);
@@ -129,8 +189,9 @@ public class DetalheGinasioActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        if (observacaoFavorito != null) observacaoFavorito.remove();
-        observacaoFavorito = null;
+        // APAGADO: if (observacaoFavorito != null) observacaoFavorito.remove();
+
+
         if (erroFavorito != null) erroFavorito.dismiss();
         super.onStop();
     }
@@ -157,6 +218,18 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         }
 
         carregarFoto(ginasio.getReferenciaFoto());
+        ListView listViewAvaliacoes = findViewById(R.id.listViewAvaliacoes);
+        List<Avaliacao> listaDeAvaliacoes = ginasio.getAvaliacoes();
+        Log.d("DetalheGinasioActivity", "Avaliações: " + listaDeAvaliacoes.size());
+
+        if (listaDeAvaliacoes != null && !listaDeAvaliacoes.isEmpty()) {
+            AvaliacaoAdapter adapter = new AvaliacaoAdapter(this, listaDeAvaliacoes);
+            listViewAvaliacoes.setAdapter(adapter);
+            listViewAvaliacoes.setVisibility(View.VISIBLE); // Garante que fica visível
+        } else {
+            listViewAvaliacoes.setVisibility(View.GONE); // Esconde a lista se não houver comentários
+        }
+
     }
 
     private String valorOuIndisponivel(String valor, String alternativa) {

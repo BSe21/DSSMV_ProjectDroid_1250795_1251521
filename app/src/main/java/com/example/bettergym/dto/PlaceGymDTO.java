@@ -1,4 +1,6 @@
 package com.example.bettergym.dto;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PlaceGymDTO {
     private String id;
@@ -9,6 +11,8 @@ public class PlaceGymDTO {
     private boolean abertoAgora;
     private String morada;
     private int numeroAvaliacoes;
+
+    private List<AvaliacaoDTO> avaliacoes = new ArrayList<>();
     private String referenciaFoto;
 
     // Construtor vazio (sempre boa prática, especialmente se usares Firebase mais tarde)
@@ -45,6 +49,9 @@ public class PlaceGymDTO {
     public void setLatitude(double latitude) { this.latitude = latitude; }
 
     public double getLongitude() { return longitude; }
+
+    public List<AvaliacaoDTO> getAvaliacoes() { return avaliacoes; }
+    public void setAvaliacoes(List<AvaliacaoDTO> avaliacoes) { this.avaliacoes = avaliacoes; }
 
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }

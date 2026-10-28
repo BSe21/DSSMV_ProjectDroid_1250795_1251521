@@ -12,11 +12,14 @@
     <string name="loading_retry">Tentar novamente</string>
     <string name="loading_continue">Continuar sem ginásios</string>
     <string name="loading_permission">Precisamos da permissão de localização para procurar ginásios próximos.</string>
-    <string name="loading_no_location">Não foi possível obter a localização. Ativa a localização e tenta novamente.</string>
-    <string name="loading_network_error">Não foi possível carregar os ginásios. Verifica a ligação e tenta novamente.</string>
+    <string name="loading_no_location">Não foi possível obter a localização. Ativa a localização e tenta novamente.
+    </string>
+    <string name="loading_network_error">Não foi possível carregar os ginásios. Verifica a ligação e tenta novamente.
+    </string>
     <string name="loading_timeout">O carregamento demorou demasiado. Verifica a ligação e tenta novamente.</string>
     <string name="password_change_title">Alterar palavra-passe</string>
-    <string name="password_change_description">Confirma a tua palavra-passe atual e escolhe uma nova para a tua conta.</string>
+    <string name="password_change_description">Confirma a tua palavra-passe atual e escolhe uma nova para a tua conta.
+    </string>
     <string name="password_current">Palavra-passe atual</string>
     <string name="password_new">Nova palavra-passe</string>
     <string name="password_confirm">Confirmar nova palavra-passe</string>
@@ -30,9 +33,11 @@
     <string name="favorites_remove">Remover dos favoritos</string>
     <string name="favorites_remove_named">Remover %1$s dos favoritos</string>
     <string name="favorites_empty_title">Ainda não tens favoritos</string>
-    <string name="favorites_empty_description">Abre a ficha de um ginásio e toca na estrela para o guardar aqui.</string>
+    <string name="favorites_empty_description">Abre a ficha de um ginásio e toca na estrela para o guardar aqui.
+    </string>
     <string name="favorites_loading">A carregar favoritos…</string>
-    <string name="favorites_error">Não foi possível carregar os favoritos. Verifica a ligação e tenta novamente.</string>
+    <string name="favorites_error">Não foi possível carregar os favoritos. Verifica a ligação e tenta novamente.
+    </string>
     <string name="favorites_write_error">Não foi possível atualizar os favoritos. Tenta novamente.</string>
     <string name="favorites_added">Ginásio adicionado aos favoritos.</string>
     <string name="favorites_removed">Ginásio removido dos favoritos.</string>

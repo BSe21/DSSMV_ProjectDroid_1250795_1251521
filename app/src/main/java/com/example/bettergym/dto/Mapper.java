@@ -3,6 +3,7 @@ package com.example.bettergym.dto;
 import com.example.bettergym.model.Ginasio;
 import com.example.bettergym.model.Favorito;
 import com.example.bettergym.model.Perfil;
+import com.example.bettergym.model.Avaliacao;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,9 @@ public class Mapper {
 
     public static Ginasio toModel(PlaceGymDTO dto) {
         if (dto == null) return null;
-        return new Ginasio(
+
+        // 1. Criamos a variável 'ginasio' primeiro
+        Ginasio ginasio = new Ginasio(
                 dto.getId(),
                 dto.getNome(),
                 dto.getLatitude(),
@@ -21,6 +24,18 @@ public class Mapper {
                 dto.getNumeroAvaliacoes(),
                 dto.getReferenciaFoto()
         );
+
+
+        if (dto.getAvaliacoes() != null) {
+            List<Avaliacao> listaAvaliacoesModel = new ArrayList<>();
+            for (AvaliacaoDTO avaliacaoDTO : dto.getAvaliacoes()) {
+                listaAvaliacoesModel.add(toModel(avaliacaoDTO));
+            }
+            ginasio.setAvaliacoes(listaAvaliacoesModel);
+        }
+
+
+        return ginasio;
     }
 
     public static List<Ginasio> toModelList(List<PlaceGymDTO> dtos) {
@@ -76,4 +91,27 @@ public class Mapper {
         return dto;
     }
 
+    public static AvaliacaoDTO toDTO(Avaliacao avaliacao) {
+        if (avaliacao == null) return null;
+        AvaliacaoDTO dto = new AvaliacaoDTO();
+        dto.setId(avaliacao.getId());
+        dto.setUser_id(avaliacao.getUser_id());
+        dto.setGinasio_id(avaliacao.getGinasio_id());
+        dto.setNota(avaliacao.getNota());
+        dto.setDescricao(avaliacao.getDescricao());
+        dto.setData_avaliacao(avaliacao.getData_avaliacao());
+        return dto;
+    }
+    public static Avaliacao toModel(AvaliacaoDTO dto) {
+        if (dto == null) return null;
+
+        return new Avaliacao(
+                dto.getId(),
+                dto.getUser_id(),
+                dto.getGinasio_id(),
+                dto.getNota(),
+                dto.getDescricao(),
+                dto.getData_avaliacao()
+        );
+    }
 }

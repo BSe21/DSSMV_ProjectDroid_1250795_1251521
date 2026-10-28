@@ -60,18 +60,48 @@ public class PerfilFragment extends Fragment {
         });
 
         // 2. Pede os dados ao Serviço (o serviço trata do DTO e do Mapper nos bastidores)
+        // 2. Pede os dados ao Serviço
         perfilService.carregarPerfil(uid, new PerfilService.PerfilCallback() {
             @Override
             public void onSuccess(Perfil perfil) {
-                if (isAdded()) mostrarPerfil(perfil);
+                // VOLTAR À THREAD DO ECRÃ!
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (isAdded()) mostrarPerfil(perfil);
+                    });
+                }
             }
 
             @Override
             public void onError(Exception e) {
-                if (isAdded()) {
-                    txtNome.setText("—");
-                    Toast.makeText(requireContext(), "Erro ao carregar perfil: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                // VOLTAR À THREAD DO ECRÃ PARA MOSTRAR O TOAST E TEXTO!
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (isAdded()) {
+                            txtNome.setText("—");
+                            Toast.makeText(requireContext(), "Erro ao carregar perfil: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
+            }
+        });
+
+        // 3. Pede as estatísticas ao Serviço (Também têm de voltar à Thread do Ecrã)
+        perfilService.contarEstatistica("visitas", uid, contagem -> {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> { if (isAdded()) txtVisitas.setText(String.valueOf(contagem)); });
+            }
+        });
+
+        perfilService.contarEstatistica("favoritos", uid, contagem -> {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> { if (isAdded()) txtFavoritos.setText(String.valueOf(contagem)); });
+            }
+        });
+
+        perfilService.contarEstatistica("avaliacoes", uid, contagem -> {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> { if (isAdded()) txtAvaliacoes.setText(String.valueOf(contagem)); });
             }
         });
 

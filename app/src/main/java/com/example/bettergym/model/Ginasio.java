@@ -1,6 +1,8 @@
 package com.example.bettergym.model;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Ginasio implements Serializable {
     private String id;
@@ -11,6 +13,8 @@ public class Ginasio implements Serializable {
     private boolean abertoAgora;
     private String morada;
     private int numeroAvaliacoes;
+
+    private List<Avaliacao> avaliacoes = new ArrayList<>();
     private String referenciaFoto;
 
     public Ginasio() {}
@@ -45,6 +49,9 @@ public class Ginasio implements Serializable {
 
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
+    public void setAvaliacoes(List<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
 
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }

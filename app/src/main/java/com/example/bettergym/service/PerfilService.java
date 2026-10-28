@@ -1,16 +1,21 @@
 package com.example.bettergym.service;
 
+import com.example.bettergym.BuildConfig;
 import com.example.bettergym.dto.Mapper;
 import com.example.bettergym.dto.PerfilDTO;
 import com.example.bettergym.model.Perfil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.AggregateSource;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.bettergym.handler.JsonHandler;
+import com.example.bettergym.handler.NetworkHandler;
 
 public class PerfilService {
 
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+
 
     public interface PerfilCallback {
         void onSuccess(Perfil perfil);
@@ -34,22 +39,30 @@ public class PerfilService {
 
     // AQUI ESTÁ O FLUXO DO FIREBASE!
     public void carregarPerfil(String uid, PerfilCallback callback) {
-        db.collection("perfis").document(uid).get()
-                .addOnSuccessListener(doc -> {
-                    if (doc.exists()) {
-                        // 1. Firebase carrega os dados brutos para o DTO
-                        PerfilDTO dto = doc.toObject(PerfilDTO.class);
+        new Thread(() -> {
+            try {
 
-                        // 2. O Mapper traduz o DTO para o teu Modelo (passando o uid como ID!)
-                        Perfil perfil = Mapper.toModel(uid, dto);
+                String url = BuildConfig.BASE_URL + "perfis/" + uid;
 
-                        // 3. Devolvemos o Modelo pronto a usar na UI
-                        callback.onSuccess(perfil);
-                    } else {
-                        callback.onError(new Exception("Perfil não encontrado."));
-                    }
-                })
-                .addOnFailureListener(callback::onError);
+
+                String respostaJson = NetworkHandler.get(url, null);
+
+
+                PerfilDTO dto = JsonHandler.deSerializeFirebaseJson2PerfilDTO(respostaJson);
+
+                if (dto != null) {
+
+                    Perfil perfil = Mapper.toModel(uid, dto);
+
+
+                    callback.onSuccess(perfil);
+                } else {
+                    callback.onError(new Exception("Perfil não encontrado ou vazio."));
+                }
+            } catch (Exception e) {
+                callback.onError(e);
+            }
+        }).start();
     }
 
     // Estatísticas (Mantém-se igual pois devolve apenas um número)

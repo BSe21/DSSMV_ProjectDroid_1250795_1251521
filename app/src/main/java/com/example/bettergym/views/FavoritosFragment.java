@@ -20,7 +20,7 @@ import java.util.List;
 public class FavoritosFragment extends Fragment {
     private FavoritosService service;
     private FavoritosAdapter adapter;
-    private ListenerRegistration observacao;
+
 
     @Nullable
     @Override
@@ -44,23 +44,33 @@ public class FavoritosFragment extends Fragment {
     }
 
     private void carregar() {
-        if (observacao != null) observacao.remove();
         mostrarEstado(R.string.favorites_loading, true, false, false);
-        observacao = service.observarLista(new FavoritosService.ListaCallback() {
+
+        // MUDOU AQUI (apagou-se a variável e mudou o nome para obterLista)
+        service.obterLista(new FavoritosService.ListaCallback() {
             @Override public void onResultado(List<Favorito> favoritos) {
-                View view = getView();
-                if (view == null) return;
-                adapter.atualizar(favoritos);
-                if (favoritos.isEmpty()) {
-                    mostrarEstado(R.string.favorites_empty_title, false, true, false);
-                } else {
-                    view.findViewById(R.id.estadoFavoritos).setVisibility(View.GONE);
-                    view.findViewById(R.id.listaFavoritos).setVisibility(View.VISIBLE);
-                }
+                // ADICIONA ESTAS DUAS LINHAS:
+                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+
+                    View view = getView();
+                    if (view == null) return;
+                    adapter.atualizar(favoritos);
+                    if (favoritos.isEmpty()) {
+                        mostrarEstado(R.string.favorites_empty_title, false, true, false);
+                    } else {
+                        view.findViewById(R.id.estadoFavoritos).setVisibility(View.GONE);
+                        view.findViewById(R.id.listaFavoritos).setVisibility(View.VISIBLE);
+                    }
+
+                    // ADICIONA ESTA LINHA PARA FECHAR:
+                });
             }
 
             @Override public void onErro(Exception erro) {
-                mostrarEstado(R.string.favorites_error, false, false, true);
+                // ENVOLVE A LINHA DELE:
+                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                    mostrarEstado(R.string.favorites_error, false, false, true);
+                });
             }
         });
     }
@@ -78,7 +88,8 @@ public class FavoritosFragment extends Fragment {
 
     private void abrirDetalhes(Favorito favorito) {
         Intent intent = new Intent(requireContext(), DetalheGinasioActivity.class);
-        intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO, favorito.getGinasio());
+        // Passamos apenas o ID do ginásio em vez do objeto inteiro!
+        intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO_ID, favorito.getGinasio_id());
         startActivity(intent);
     }
 
@@ -87,22 +98,28 @@ public class FavoritosFragment extends Fragment {
         atual.definirOcupado(favorito.getGinasio_id(), true);
         service.remover(favorito.getGinasio_id(), new FavoritosService.EscritaCallback() {
             @Override public void onSucesso() {
-                atual.definirOcupado(favorito.getGinasio_id(), false);
-                if (getView() != null) Toast.makeText(requireContext(),
-                        R.string.favorites_removed, Toast.LENGTH_SHORT).show();
+                // ADICIONA O RUN ON UI THREAD E O CARREGAR():
+                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                    atual.definirOcupado(favorito.getGinasio_id(), false);
+                    if (getView() != null) Toast.makeText(requireContext(),
+                            R.string.favorites_removed, Toast.LENGTH_SHORT).show();
+
+                    carregar(); // <--- NOVA LINHA PARA ATUALIZAR A LISTA
+                });
             }
 
             @Override public void onErro(Exception erro) {
-                atual.definirOcupado(favorito.getGinasio_id(), false);
-                if (getView() != null) Toast.makeText(requireContext(),
-                        R.string.favorites_write_error, Toast.LENGTH_LONG).show();
+                // ENVOLVE O CÓDIGO DELE:
+                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                    atual.definirOcupado(favorito.getGinasio_id(), false);
+                    if (getView() != null) Toast.makeText(requireContext(),
+                            R.string.favorites_write_error, Toast.LENGTH_LONG).show();
+                });
             }
         });
     }
-
     @Override public void onStop() {
-        if (observacao != null) observacao.remove();
-        observacao = null;
+
         super.onStop();
     }
 }
