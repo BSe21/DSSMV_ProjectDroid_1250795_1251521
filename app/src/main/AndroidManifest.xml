@@ -21,7 +21,7 @@
                 android:exported="false"/> <!-- Chave de API do Google Maps Platform -->
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyCKax_upBuMHtXzfmrAE6ItVybCaS-c-ug"/>
+                android:value="${MAPS_API_KEY}"/>
 
         <activity
                 android:name=".views.RegisterActivity"

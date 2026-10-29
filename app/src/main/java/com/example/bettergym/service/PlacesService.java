@@ -15,7 +15,7 @@ import java.util.Map;
 public class PlacesService {
 
 
-    private static final String URL = "https://places.googleapis.com/v1/places:searchNearby";
+    private static final String URL = BuildConfig.GOOGLE_SEARCH_NEARBY_URL;
 
     public interface OnGymsLoadedListener {
         // Chamado pela worker thread; a View encaminha as atualizações para a UI Thread.

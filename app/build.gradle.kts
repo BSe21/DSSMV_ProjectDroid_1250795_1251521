@@ -31,12 +31,21 @@ android {
         val googleApiUrl = properties.getProperty("GOOGLE_API_URL") ?: ""
         buildConfigField("String", "GOOGLE_API_URL", "\"$googleApiUrl\"")
 
+        val googleSearchNearbyUrl = properties.getProperty("GOOGLE_SEARCH_NEARBY_URL") ?: ""
+        buildConfigField("String", "GOOGLE_SEARCH_NEARBY_URL", "\"$googleSearchNearbyUrl\"")
+
         val baseUrl = properties.getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
         // ATENÇÃO: Se a tua chave se chamar GOOGLE_PLACES_API_KEY no local.properties
-        val apiKey = properties.getProperty("GOOGLE_PLACES_API_KEY") ?: ""
+        val apiKey = properties.getProperty("GOOGLE_PLACES_API_KEY")
+            ?: properties.getProperty("GOOGLE_API_KEY") ?: ""
         buildConfigField("String", "GOOGLE_PLACES_API_KEY", "\"$apiKey\"")
+
+        val mapsApiKey = properties.getProperty("MAPS_API_KEY")
+            ?: properties.getProperty("GOOGLE_MAPS_API_KEY")
+            ?: properties.getProperty("GOOGLE_API_KEY") ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     // 3. ATIVAR A CLASSE BuildConfig (Tem de ficar solto dentro do bloco 'android')
