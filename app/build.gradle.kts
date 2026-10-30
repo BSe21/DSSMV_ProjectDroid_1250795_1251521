@@ -16,7 +16,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.example.bettergym"
-    compileSdk = 35 // Simplifiquei para a versão padrão e estável
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.bettergym"
