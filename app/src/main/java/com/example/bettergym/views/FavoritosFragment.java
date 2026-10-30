@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.bettergym.R;
+import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.model.Favorito;
 import com.example.bettergym.service.FavoritosService;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -112,8 +114,14 @@ public class FavoritosFragment extends Fragment {
                 // ENVOLVE O CÓDIGO DELE:
                 if (getActivity() != null) getActivity().runOnUiThread(() -> {
                     atual.definirOcupado(favorito.getGinasio_id(), false);
+                    String msg = getString(R.string.favorites_write_error);
+                    if (erro instanceof InvalidDataException) {
+                        msg = ((InvalidDataException) erro).what();
+                    } else if (erro instanceof DataConsistencyException) {
+                        msg = ((DataConsistencyException) erro).what();
+                    }
                     if (getView() != null) Toast.makeText(requireContext(),
-                            R.string.favorites_write_error, Toast.LENGTH_LONG).show();
+                            msg, Toast.LENGTH_LONG).show();
                 });
             }
         });

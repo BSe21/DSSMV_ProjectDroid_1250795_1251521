@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,7 +27,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
+
 import com.example.bettergym.R;
+import com.example.bettergym.helper.MapHelper;
 import com.example.bettergym.model.Ginasio;
 import com.example.bettergym.service.PlacesService;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -173,8 +177,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Aplica o estilo visual diretamente na View
-        aplicarEstiloLimpo();
+        // Delega o estilo visual ao MapHelper
+        MapHelper.aplicarEstilo(this, mMap);
         ajustarEspacamento();
 
         // Ligar a lógica do cartão interativo ao mapa!
@@ -236,14 +240,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean tentativaAtual(int tentativa) {
         return !isFinishing() && !isDestroyed() && carregamentoAtivo
                 && tentativa == tentativaCarregamento;
-    }
-
-    private void aplicarEstiloLimpo() {
-        try {
-            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void ajustarEspacamento() {
@@ -309,59 +305,78 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean gpsAtivo = lm != null && (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+
+        if (!gpsAtivo) {
+            Toast.makeText(this, "Por favor, ativa a Localização (GPS) nas definições do telemóvel", Toast.LENGTH_LONG).show();
+            mostrarErroCarregamento(R.string.loading_no_location);
+            return;
+        }
+
         final int tentativa = ++tentativaCarregamento;
         if (pedidoLocalizacao != null) pedidoLocalizacao.cancel();
         pedidoLocalizacao = new CancellationTokenSource();
-        // O fornecedor de localização trabalha de forma assíncrona, sem bloquear a UI.
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY,
-                pedidoLocalizacao.getToken()).addOnSuccessListener(this, location -> {
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, cachedLocation -> {
             if (!tentativaAtual(tentativa)) return;
-            if (location != null) {
-                atualizarProgresso(50, R.string.loading_search);
-                LatLng minhaPosicao = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(minhaPosicao, 14.5f));
-
-                // 4. Pede os dados ao PlacesService
-                placesService.pesquisarGinasiosProximos(minhaPosicao, new PlacesService.OnGymsLoadedListener() {
-                    @Override
-                    public void onProgress(int percentagem) {
-                        // Estes callbacks chegam da Thread criada no PlacesService.
-                        runOnUiThread(() -> {
-                            if (!tentativaAtual(tentativa)) return;
-                            atualizarProgresso(percentagem, percentagem == 70
-                                    ? R.string.loading_received : R.string.loading_markers);
-                        });
-                    }
-
-                    @Override
-                    public void onSuccess(List<Ginasio> ginasios) {
-                        runOnUiThread(() -> {
-                            if (!tentativaAtual(tentativa)) return;
-                            desenharMarcadores(ginasios);
-                            atualizarProgresso(100, R.string.loading_done);
-                            carregamentoAtivo = false;
-                            uiHandler.removeCallbacks(limiteCarregamento);
-                            // Deixa o frame dos 100% ser desenhado antes de revelar o mapa.
-                            ecraCarregamento.postOnAnimation(() -> {
-                                if (!isFinishing() && !isDestroyed()) {
-                                    ecraCarregamento.setVisibility(View.GONE);
-                                }
-                            });
-                        });
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        runOnUiThread(() -> {
-                            if (tentativaAtual(tentativa)) mostrarErroCarregamento(R.string.loading_network_error);
-                        });
-                    }
-                });
+            if (cachedLocation != null) {
+                processarLocalizacaoEncontrada(cachedLocation, tentativa);
             } else {
-                mostrarErroCarregamento(R.string.loading_no_location);
+                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, pedidoLocalizacao.getToken())
+                        .addOnSuccessListener(this, freshLocation -> {
+                            if (!tentativaAtual(tentativa)) return;
+                            if (freshLocation != null) {
+                                processarLocalizacaoEncontrada(freshLocation, tentativa);
+                            } else {
+                                mostrarErroCarregamento(R.string.loading_no_location);
+                            }
+                        })
+                        .addOnFailureListener(this, e -> {
+                            if (tentativaAtual(tentativa)) mostrarErroCarregamento(R.string.loading_no_location);
+                        });
             }
-        }).addOnFailureListener(this, e -> {
-            if (tentativaAtual(tentativa)) mostrarErroCarregamento(R.string.loading_no_location);
+        });
+    }
+
+    private void processarLocalizacaoEncontrada(Location location, int tentativa) {
+        atualizarProgresso(50, R.string.loading_search);
+        LatLng minhaPosicao = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(minhaPosicao, 14.5f));
+
+        placesService.pesquisarGinasiosProximos(minhaPosicao, new PlacesService.OnGymsLoadedListener() {
+            @Override
+            public void onProgress(int percentagem) {
+                runOnUiThread(() -> {
+                    if (!tentativaAtual(tentativa)) return;
+                    atualizarProgresso(percentagem, percentagem == 70
+                            ? R.string.loading_received : R.string.loading_markers);
+                });
+            }
+
+            @Override
+            public void onSuccess(List<Ginasio> ginasios) {
+                runOnUiThread(() -> {
+                    if (!tentativaAtual(tentativa)) return;
+                    desenharMarcadores(ginasios);
+                    atualizarProgresso(100, R.string.loading_done);
+                    carregamentoAtivo = false;
+                    uiHandler.removeCallbacks(limiteCarregamento);
+                    ecraCarregamento.postOnAnimation(() -> {
+                        if (!isFinishing() && !isDestroyed()) {
+                            ecraCarregamento.setVisibility(View.GONE);
+                        }
+                    });
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    if (tentativaAtual(tentativa)) mostrarErroCarregamento(R.string.loading_network_error);
+                });
+            }
         });
     }
 
@@ -374,7 +389,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Marker marcador = mMap.addMarker(new MarkerOptions()
                     .position(posicao)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    .title(g.getNome())
+                    .anchor(0.5f, 0.5f)
+                    .icon(MapHelper.criarMarcadorGinasio(this, g.isAbertoAgora())));
 
             if (marcador != null) {
                 marcador.setTag(g);

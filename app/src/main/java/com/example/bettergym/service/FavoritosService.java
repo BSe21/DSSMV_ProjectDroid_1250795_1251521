@@ -3,6 +3,7 @@ package com.example.bettergym.service;
 import com.example.bettergym.BuildConfig;
 import com.example.bettergym.dto.FavoritoDTO;
 import com.example.bettergym.dto.Mapper;
+import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.handler.JsonHandler;
 import com.example.bettergym.handler.NetworkHandler;
 import com.example.bettergym.model.Favorito;
@@ -41,7 +42,7 @@ public class FavoritosService {
 
     private String uidAtual() {
         FirebaseUser user = auth.getCurrentUser();
-        if (user == null) throw new IllegalStateException("Inicia sessão para consultar os favoritos.");
+        if (user == null) throw new InvalidDataException("Inicia sessão para consultar os favoritos.");
         return user.getUid();
     }
 
@@ -53,7 +54,7 @@ public class FavoritosService {
         new Thread(() -> {
             try {
                 if (ginasioId == null || ginasioId.isEmpty() || ginasioId.contains("/")) {
-                    throw new IllegalArgumentException("Ginásio inválido.");
+                    throw new InvalidDataException("Ginásio inválido.");
                 }
 
                 String uid = uidAtual();
@@ -145,6 +146,9 @@ public class FavoritosService {
     public void guardar(Ginasio ginasio, EscritaCallback callback) {
         new Thread(() -> {
             try {
+                if (ginasio == null || ginasio.getId() == null || ginasio.getId().trim().isEmpty()) {
+                    throw new InvalidDataException("Ginásio inválido para guardar.");
+                }
                 String uid = uidAtual();
                 String docId = uid + "_" + ginasio.getId();
                 String url = BuildConfig.BASE_URL + "favoritos/" + docId;
@@ -182,6 +186,9 @@ public class FavoritosService {
     public void remover(String ginasioId, EscritaCallback callback) {
         new Thread(() -> {
             try {
+                if (ginasioId == null || ginasioId.trim().isEmpty()) {
+                    throw new InvalidDataException("Ginásio inválido para remover.");
+                }
                 String uid = uidAtual();
                 String docId = uid + "_" + ginasioId;
                 String url = BuildConfig.BASE_URL + "favoritos/" + docId;

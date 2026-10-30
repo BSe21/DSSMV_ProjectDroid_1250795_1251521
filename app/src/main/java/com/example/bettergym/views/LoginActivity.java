@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.bettergym.R;
+import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.service.AuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -60,10 +61,14 @@ public class LoginActivity extends AppCompatActivity {
                     finish();
                 }
                 @Override
-                public void onErro(String erro) {
+                public void onErro(Exception erro) {
                     btnLogin.setEnabled(true);
                     btnLogin.setText("Entrar");
-                    Toast.makeText(LoginActivity.this, erro, Toast.LENGTH_LONG).show();
+                    String msg = erro.getMessage();
+                    if (erro instanceof InvalidDataException) {
+                        msg = ((InvalidDataException) erro).what();
+                    }
+                    Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
             });
         });

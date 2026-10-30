@@ -7,6 +7,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.viewpager2.widget.ViewPager2;
+import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.service.FavoritosService;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.android.material.snackbar.Snackbar;
@@ -23,6 +26,7 @@ import com.google.android.material.button.MaterialButton;
 import com.example.bettergym.model.Avaliacao;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import android.widget.ListView;
@@ -32,9 +36,9 @@ public class DetalheGinasioActivity extends AppCompatActivity {
 
     public static final String EXTRA_GINASIO_ID = "extra_ginasio";
 
-
-
-    private ImageView imgGinasio;
+    private ViewPager2 viewPagerFotos;
+    private TextView txtIndicadorFotos;
+    private FotosAdapter fotosAdapter;
     private TextView txtSemFoto;
     private AppCompatImageButton btnFavorito;
     private Ginasio ginasio;
@@ -49,8 +53,25 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalhe_ginasio);
 
-        imgGinasio = findViewById(R.id.imgGinasio);
+        viewPagerFotos = findViewById(R.id.viewPagerFotos);
+        txtIndicadorFotos = findViewById(R.id.txtIndicadorFotos);
         txtSemFoto = findViewById(R.id.txtSemFoto);
+        fotosAdapter = new FotosAdapter(this, new ArrayList<>());
+        viewPagerFotos.setAdapter(fotosAdapter);
+        viewPagerFotos.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                int total = fotosAdapter.getItemCount();
+                if (total > 1) {
+                    txtIndicadorFotos.setText((position + 1) + " / " + total);
+                    txtIndicadorFotos.setVisibility(View.VISIBLE);
+                } else {
+                    txtIndicadorFotos.setVisibility(View.GONE);
+                }
+            }
+        });
+
         MaterialButton btnVoltar = findViewById(R.id.btnVoltar);
         btnVoltar.setOnClickListener(v -> finish());
 
@@ -67,7 +88,8 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             carregarDetalhesDaGoogle(ginasioId);
         } else {
             // Se não chegou ID nenhum, avisa e fecha
-            Toast.makeText(this, "Erro: ID do ginásio não encontrado.", Toast.LENGTH_SHORT).show();
+            InvalidDataException erro = new InvalidDataException("Erro: ID do ginásio não encontrado.");
+            Toast.makeText(this, erro.what(), Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -92,7 +114,9 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             public void onError(Exception erro) {
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) return;
-                    Toast.makeText(DetalheGinasioActivity.this, "Erro ao carregar detalhes.", Toast.LENGTH_SHORT).show();
+                    Log.e("DetalheGinasio", "Erro ao carregar detalhes", erro);
+                    String msg = erro != null && erro.getMessage() != null ? erro.getMessage() : "Erro ao carregar detalhes.";
+                    Toast.makeText(DetalheGinasioActivity.this, msg, Toast.LENGTH_SHORT).show();
                     finish();
                 });
             }
@@ -170,8 +194,15 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                     aGuardar = false;
                     if (isFinishing() || isDestroyed()) return;
                     atualizarEstrela();
-                    Toast.makeText(DetalheGinasioActivity.this,
-                            R.string.favorites_write_error, Toast.LENGTH_LONG).show();
+                    String msg = getString(R.string.favorites_write_error);
+                    if (erro instanceof InvalidDataException) {
+                        msg = ((InvalidDataException) erro).what();
+                    } else if (erro instanceof DataConsistencyException) {
+                        msg = ((DataConsistencyException) erro).what();
+                    } else if (erro != null && erro.getMessage() != null) {
+                        msg = erro.getMessage();
+                    }
+                    Toast.makeText(DetalheGinasioActivity.this, msg, Toast.LENGTH_LONG).show();
                 });
             }
         };
@@ -217,7 +248,7 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             txtRating.setText("Ainda sem avaliações públicas");
         }
 
-        carregarFoto(ginasio.getReferenciaFoto());
+        configurarFotos(ginasio);
         ListView listViewAvaliacoes = findViewById(R.id.listViewAvaliacoes);
         List<Avaliacao> listaDeAvaliacoes = ginasio.getAvaliacoes();
         Log.d("DetalheGinasioActivity", "Avaliações: " + listaDeAvaliacoes.size());
@@ -236,24 +267,28 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         return valor == null || valor.trim().isEmpty() ? alternativa : valor;
     }
 
-    private void carregarFoto(String referenciaFoto) {
-        String urlFoto = PlacesService.obterUrlFoto(referenciaFoto);
-        if (urlFoto == null) return;
+    private void configurarFotos(Ginasio ginasio) {
+        List<String> listaFotos = new ArrayList<>();
+        if (ginasio.getFotos() != null && !ginasio.getFotos().isEmpty()) {
+            listaFotos.addAll(ginasio.getFotos());
+        } else if (ginasio.getReferenciaFoto() != null && !ginasio.getReferenciaFoto().isEmpty()) {
+            listaFotos.add(ginasio.getReferenciaFoto());
+        }
 
-        new Thread(() -> {
-            try {
-                Bitmap bitmap = NetworkHandler.downloadBitmap(urlFoto);
-                if (bitmap != null) {
-                    runOnUiThread(() -> {
-                        if (isFinishing() || isDestroyed()) return;
-                        imgGinasio.setImageBitmap(bitmap);
-                        imgGinasio.setVisibility(View.VISIBLE);
-                        txtSemFoto.setVisibility(View.GONE);
-                    });
-                }
-            } catch (Exception ignored) {
-                // Mantém o estado sem foto quando a API não devolve uma imagem utilizável.
+        if (!listaFotos.isEmpty()) {
+            fotosAdapter.atualizarFotos(listaFotos);
+            viewPagerFotos.setVisibility(View.VISIBLE);
+            txtSemFoto.setVisibility(View.GONE);
+            if (listaFotos.size() > 1) {
+                txtIndicadorFotos.setText("1 / " + listaFotos.size());
+                txtIndicadorFotos.setVisibility(View.VISIBLE);
+            } else {
+                txtIndicadorFotos.setVisibility(View.GONE);
             }
-        }).start();
+        } else {
+            viewPagerFotos.setVisibility(View.GONE);
+            txtIndicadorFotos.setVisibility(View.GONE);
+            txtSemFoto.setVisibility(View.VISIBLE);
+        }
     }
 }

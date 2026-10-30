@@ -1,5 +1,6 @@
 package com.example.bettergym.dto;
 
+import com.example.bettergym.exceptions.DataConsistencyException;
 import com.example.bettergym.model.Ginasio;
 import com.example.bettergym.model.Favorito;
 import com.example.bettergym.model.Perfil;
@@ -11,6 +12,9 @@ public class Mapper {
 
     public static Ginasio toModel(PlaceGymDTO dto) {
         if (dto == null) return null;
+        if (dto.getId() == null || dto.getId().trim().isEmpty()) {
+            throw new DataConsistencyException("Inconsistência nos dados do ginásio: ID em falta.");
+        }
 
         // 1. Criamos a variável 'ginasio' primeiro
         Ginasio ginasio = new Ginasio(
@@ -34,6 +38,10 @@ public class Mapper {
             ginasio.setAvaliacoes(listaAvaliacoesModel);
         }
 
+        if (dto.getFotos() != null) {
+            ginasio.setFotos(dto.getFotos());
+        }
+
 
         return ginasio;
     }
@@ -50,6 +58,9 @@ public class Mapper {
 
     public static Perfil toModel(String id, PerfilDTO dto) {
         if (dto == null) return null;
+        if (id == null || id.trim().isEmpty()) {
+            throw new DataConsistencyException("Inconsistência nos dados do perfil: ID de utilizador em falta.");
+        }
 
         // Passar os dados EXATAMENTE na ordem do construtor:
         // id, nome, username, email, nascimento, telemovel, foto, registo
@@ -67,6 +78,9 @@ public class Mapper {
 
     public static Favorito toModel(String id, FavoritoDTO dto) {
         if (dto == null) return null;
+        if (id == null || id.trim().isEmpty()) {
+            throw new DataConsistencyException("Inconsistência nos dados do favorito: ID em falta.");
+        }
         Favorito favorito = new Favorito(id, dto.getUser_id(), dto.getGinasio_id(),
                 dto.getData_adicionado());
         favorito.setGinasio(toModel(dto.getGinasio()));
@@ -75,9 +89,11 @@ public class Mapper {
 
     public static PlaceGymDTO toDTO(Ginasio ginasio) {
         if (ginasio == null) return null;
-        return new PlaceGymDTO(ginasio.getId(), ginasio.getNome(), ginasio.getLatitude(),
+        PlaceGymDTO dto = new PlaceGymDTO(ginasio.getId(), ginasio.getNome(), ginasio.getLatitude(),
                 ginasio.getLongitude(), ginasio.getRating(), ginasio.isAbertoAgora(),
                 ginasio.getMorada(), ginasio.getNumeroAvaliacoes(), ginasio.getReferenciaFoto());
+        dto.setFotos(ginasio.getFotos());
+        return dto;
     }
 
     public static FavoritoDTO toDTO(Favorito favorito) {

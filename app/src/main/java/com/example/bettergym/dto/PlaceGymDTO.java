@@ -14,6 +14,7 @@ public class PlaceGymDTO {
 
     private List<AvaliacaoDTO> avaliacoes = new ArrayList<>();
     private String referenciaFoto;
+    private List<String> fotos = new ArrayList<>();
 
     // Construtor vazio (sempre boa prática, especialmente se usares Firebase mais tarde)
     public PlaceGymDTO() {}
@@ -65,4 +66,7 @@ public class PlaceGymDTO {
 
     public String getReferenciaFoto() { return referenciaFoto; }
     public void setReferenciaFoto(String referenciaFoto) { this.referenciaFoto = referenciaFoto; }
+
+    public List<String> getFotos() { return fotos; }
+    public void setFotos(List<String> fotos) { this.fotos = fotos; }
 }

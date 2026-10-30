@@ -9,7 +9,7 @@ app/build/
 out/
 
 local.properties
-
+./vscode
 .idea/
 *.iml
 *.iws

@@ -37,9 +37,19 @@ public class JsonHandler {
             double rating = jsonChildNode.optDouble("rating", 0.0);
             String morada = jsonChildNode.optString("formattedAddress", "");
             int numeroAvaliacoes = jsonChildNode.optInt("userRatingCount", 0);
+            List<String> listaFotos = new ArrayList<>();
             String referenciaFoto = "";
-            if (jsonChildNode.has("photos") && jsonChildNode.getJSONArray("photos").length() > 0) {
-                referenciaFoto = jsonChildNode.getJSONArray("photos").getJSONObject(0).optString("name", "");
+            if (jsonChildNode.has("photos")) {
+                JSONArray photosArray = jsonChildNode.getJSONArray("photos");
+                for (int p = 0; p < photosArray.length(); p++) {
+                    String nomeFoto = photosArray.getJSONObject(p).optString("name", "");
+                    if (!nomeFoto.isEmpty()) {
+                        listaFotos.add(nomeFoto);
+                    }
+                }
+                if (!listaFotos.isEmpty()) {
+                    referenciaFoto = listaFotos.get(0);
+                }
             }
 
             // --- MUDANÇA AQUI: Navegar pelas "caixas" corretas da Google ---
@@ -80,6 +90,7 @@ public class JsonHandler {
 
             PlaceGymDTO gymDTO = new PlaceGymDTO(id, name, lat, lng, rating, isOpenNow, morada, numeroAvaliacoes, referenciaFoto);
             gymDTO.setAvaliacoes(listaAvaliacoes);
+            gymDTO.setFotos(listaFotos);
 
             Log.d("JsonHandler", "Ginásio: " + gymDTO.getNome() + " - Avaliações: " + listaAvaliacoes);
             list.add(gymDTO);

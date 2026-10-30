@@ -103,9 +103,17 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onErro(String erro) {
+                public void onErro(Exception erro) {
                     restaurarBotao();
-                    Toast.makeText(RegisterActivity.this, erro, Toast.LENGTH_LONG).show();
+                    String mensagem = erro.getMessage();
+                    if (erro instanceof InvalidDataException) {
+                        mensagem = ((InvalidDataException) erro).what();
+                    } else if (erro instanceof DuplicatedDataException) {
+                        mensagem = ((DuplicatedDataException) erro).what();
+                    } else if (erro instanceof DataConsistencyException) {
+                        mensagem = ((DataConsistencyException) erro).what();
+                    }
+                    Toast.makeText(RegisterActivity.this, mensagem, Toast.LENGTH_LONG).show();
                 }
             });
 

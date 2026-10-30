@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.bettergym.R;
+import com.example.bettergym.exceptions.DataConsistencyException;
 import com.example.bettergym.helper.Utils;
 import com.example.bettergym.handler.NetworkHandler;
 import com.example.bettergym.model.Perfil;
@@ -79,7 +80,8 @@ public class PerfilFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         if (isAdded()) {
                             txtNome.setText("—");
-                            Toast.makeText(requireContext(), "Erro ao carregar perfil: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            String msg = e instanceof DataConsistencyException ? ((DataConsistencyException) e).what() : e.getMessage();
+                            Toast.makeText(requireContext(), "Erro ao carregar perfil: " + msg, Toast.LENGTH_LONG).show();
                         }
                     });
                 }

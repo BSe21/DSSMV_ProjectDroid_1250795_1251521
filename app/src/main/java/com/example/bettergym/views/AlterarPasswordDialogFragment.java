@@ -13,6 +13,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.bettergym.R;
+import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.service.AuthService;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
@@ -67,10 +69,16 @@ public class AlterarPasswordDialogFragment extends DialogFragment {
                     }
 
                     @Override
-                    public void onErro(String mensagem) {
+                    public void onErro(Exception e) {
                         if (!isAdded() || getDialog() != dialog) return;
                         definirOcupado(dialog, false);
-                        erro.setText(mensagem);
+                        String msg = e != null ? e.getMessage() : "";
+                        if (e instanceof InvalidDataException) {
+                            msg = ((InvalidDataException) e).what();
+                        } else if (e instanceof DataConsistencyException) {
+                            msg = ((DataConsistencyException) e).what();
+                        }
+                        erro.setText(msg);
                         erro.setVisibility(View.VISIBLE);
                     }
                 });

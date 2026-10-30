@@ -8,4 +8,5 @@
     <color name="estado_aberto">#2E7D32</color>
     <color name="estado_fechado">#C62828</color>
     <color name="favorito_amarelo">#FFC107</color>
+    <color name="nav_inativo">#8A959E</color>
 </resources>

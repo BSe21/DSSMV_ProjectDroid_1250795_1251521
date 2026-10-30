@@ -7,9 +7,10 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
-import com.example.bettergym.helper.PasswordValidator;
-
+import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.exceptions.DuplicatedDataException;
 import com.example.bettergym.exceptions.InvalidDataException;
+import com.example.bettergym.helper.PasswordValidator;
 import com.example.bettergym.model.Perfil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,18 +29,18 @@ public class AuthService {
     // Interface para comunicar o sucesso ou erro de volta à Activity
     public interface AuthCallback {
         void onSucesso(String mensagem);
-        void onErro(String erro);
+        void onErro(Exception erro);
     }
 
     public void alterarPalavraPasse(String atual, String nova, String confirmacao, AuthCallback callback) {
         String erroValidacao = PasswordValidator.validarAlteracao(atual, nova, confirmacao);
         if (erroValidacao != null) {
-            callback.onErro(erroValidacao);
+            callback.onErro(new InvalidDataException(erroValidacao));
             return;
         }
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null || user.getEmail() == null) {
-            callback.onErro("A sessão expirou. Volta a iniciar sessão.");
+            callback.onErro(new DataConsistencyException("A sessão expirou. Volta a iniciar sessão."));
             return;
         }
         // O SDK executa os pedidos de rede de forma assíncrona.
@@ -48,14 +49,14 @@ public class AuthService {
                 .addOnSuccessListener(ignored -> {
                     FirebaseUser current = mAuth.getCurrentUser();
                     if (current == null || !user.getUid().equals(current.getUid())) {
-                        callback.onErro("A sessão mudou. Volta a iniciar sessão.");
+                        callback.onErro(new DataConsistencyException("A sessão mudou. Volta a iniciar sessão."));
                         return;
                     }
                     user.updatePassword(nova)
                             .addOnSuccessListener(result -> callback.onSucesso("Palavra-passe alterada com sucesso!"))
-                            .addOnFailureListener(e -> callback.onErro(mensagemAlteracao(e, false)));
+                            .addOnFailureListener(e -> callback.onErro(new Exception(mensagemAlteracao(e, false))));
                 })
-                .addOnFailureListener(e -> callback.onErro(mensagemAlteracao(e, true)));
+                .addOnFailureListener(e -> callback.onErro(new Exception(mensagemAlteracao(e, true))));
     }
 
     private String mensagemAlteracao(Exception erro, boolean confirmarAtual) {
@@ -108,16 +109,18 @@ public class AuthService {
 
                             // 3. Se o Auth tiver sucesso, criamos o perfil na coleção "perfis" do Firestore
                             criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, email, callback);
+                        } else {
+                            callback.onErro(new DataConsistencyException("Erro de consistência: utilizador registado sem identificador válido."));
                         }
                     } else {
                         String errorMessage = task.getException() != null ? task.getException().getMessage() : "";
-                        String msg = "Não foi possível criar a conta.";
                         if (errorMessage != null && (errorMessage.contains("already in use") || errorMessage.contains("address is already in use"))) {
-                            msg = "Já existe uma conta registada com este email.";
+                            callback.onErro(new DuplicatedDataException("Já existe uma conta registada com este email."));
                         } else if (errorMessage != null && errorMessage.contains("weak password")) {
-                            msg = "A password é demasiado fraca.";
+                            callback.onErro(new InvalidDataException("A password é demasiado fraca."));
+                        } else {
+                            callback.onErro(new Exception("Não foi possível criar a conta: " + errorMessage));
                         }
-                        callback.onErro(msg);
                     }
                 });
     }
@@ -145,16 +148,16 @@ public class AuthService {
             db.collection("perfis").document(userId)
                     .set(perfil)
                     .addOnSuccessListener(aVoid -> callback.onSucesso("Conta criada com sucesso! Podes fazer login."))
-                    .addOnFailureListener(e -> callback.onSucesso("Conta criada, mas houve um erro ao guardar o perfil. Tenta fazer login."));
+                    .addOnFailureListener(e -> callback.onErro(new DataConsistencyException("Conta criada, mas ocorreu um erro ao guardar o perfil no Firestore.")));
 
         } catch (Exception e) {
-            callback.onErro("Erro ao estruturar os dados do perfil.");
+            callback.onErro(new DataConsistencyException("Erro de consistência ao estruturar os dados do perfil."));
         }
     }
 
     public void fazerLogin(String email, String password, AuthCallback callback) {
         if (email.isEmpty() || password.isEmpty()) {
-            callback.onErro("Preenche o email e a password!");
+            callback.onErro(new InvalidDataException("Preenche o email e a password!"));
             return;
         }
 
@@ -165,9 +168,11 @@ public class AuthService {
                         if (user != null) {
                             // Devolvemos o UID do utilizador no sucesso
                             callback.onSucesso(user.getUid());
+                        } else {
+                            callback.onErro(new DataConsistencyException("Erro de consistência: utilizador sem sessão válida."));
                         }
                     } else {
-                        callback.onErro("Email ou palavra-passe incorretos!");
+                        callback.onErro(new InvalidDataException("Email ou palavra-passe incorretos!"));
                     }
                 });
     }

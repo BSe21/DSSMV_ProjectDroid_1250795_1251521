@@ -16,6 +16,7 @@ public class Ginasio implements Serializable {
 
     private List<Avaliacao> avaliacoes = new ArrayList<>();
     private String referenciaFoto;
+    private List<String> fotos = new ArrayList<>();
 
     public Ginasio() {}
 
@@ -64,4 +65,7 @@ public class Ginasio implements Serializable {
 
     public String getReferenciaFoto() { return referenciaFoto; }
     public void setReferenciaFoto(String referenciaFoto) { this.referenciaFoto = referenciaFoto; }
+
+    public List<String> getFotos() { return fotos; }
+    public void setFotos(List<String> fotos) { this.fotos = fotos; }
 }
