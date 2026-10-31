@@ -14,13 +14,16 @@ import java.util.Map;
 
 public class PlacesService {
 
-
     private static final String URL = BuildConfig.GOOGLE_SEARCH_NEARBY_URL;
 
     public interface OnGymsLoadedListener {
-        // Chamado pela worker thread; a View encaminha as atualizações para a UI Thread.
-        default void onProgress(int percentagem) {}
+        // Chamado pela worker thread; a View encaminha as atualizações para a UI
+        // Thread.
+        default void onProgress(int percentagem) {
+        }
+
         void onSuccess(List<Ginasio> ginasios);
+
         void onError(Exception e);
     }
 
@@ -31,19 +34,22 @@ public class PlacesService {
                 headers.put("Content-Type", "application/json");
                 headers.put("X-Goog-Api-Key", BuildConfig.GOOGLE_PLACES_API_KEY);
 
-                // MUDANÇA AQUI: Usar regularOpeningHours em vez de currentOpeningHours para evitar o 503
-                headers.put("X-Goog-FieldMask", "places.id,places.displayName,places.location,places.formattedAddress,places.regularOpeningHours.openNow");
+                // MUDANÇA AQUI: Usar regularOpeningHours em vez de currentOpeningHours para
+                // evitar o 503
+                headers.put("X-Goog-FieldMask",
+                        "places.id,places.displayName,places.location,places.formattedAddress,places.regularOpeningHours.openNow");
 
                 String jsonInputString = "{"
-                        + "\"includedTypes\": [\"gym\"],"
+                        + "\"includedPrimaryTypes\": [\"fitness_center\", \"gym\"],"
                         + "\"maxResultCount\": 20,"
+                        + "\"rankPreference\": \"DISTANCE\","
                         + "\"locationRestriction\": {"
                         + "  \"circle\": {"
                         + "    \"center\": {"
                         + "      \"latitude\": " + posicao.latitude + ","
                         + "      \"longitude\": " + posicao.longitude
                         + "    },"
-                        + "    \"radius\": 5000.0"
+                        + "    \"radius\": 10000.0"
                         + "  }"
                         + "}"
                         + "}";
@@ -64,17 +70,19 @@ public class PlacesService {
     }
 
     /**
-     * Constrói o endpoint Place Photos (New) a partir do nome devolvido pelo Nearby Search.
+     * Constrói o endpoint Place Photos (New) a partir do nome devolvido pelo Nearby
+     * Search.
      */
     public static String obterUrlFoto(String referenciaFoto) {
-        if (referenciaFoto == null || referenciaFoto.isEmpty()) return null;
+        if (referenciaFoto == null || referenciaFoto.isEmpty())
+            return null;
         return "https://places.googleapis.com/v1/" + referenciaFoto
                 + "/media?maxWidthPx=1200&key=" + BuildConfig.GOOGLE_PLACES_API_KEY;
     }
 
-
     public interface OnGymDetailsLoadedListener {
         void onSuccess(Ginasio ginasio);
+
         void onError(Exception e);
     }
 
@@ -88,7 +96,8 @@ public class PlacesService {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("X-Goog-Api-Key", BuildConfig.GOOGLE_PLACES_API_KEY);
                 // Nos detalhes, o fieldMask não leva o "places." antes dos nomes!
-                headers.put("X-Goog-FieldMask", "id,displayName,location,formattedAddress,rating,userRatingCount,regularOpeningHours.openNow,photos,reviews");
+                headers.put("X-Goog-FieldMask",
+                        "id,displayName,location,formattedAddress,rating,userRatingCount,regularOpeningHours.openNow,photos,reviews");
                 headers.put("Accept-Language", "pt-PT");
                 String respostaJson = NetworkHandler.get(url, headers);
 

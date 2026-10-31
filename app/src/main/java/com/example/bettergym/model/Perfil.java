@@ -1,5 +1,8 @@
 package com.example.bettergym.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Perfil {
     private String id;
     private String nome_completo;
@@ -9,6 +12,7 @@ public class Perfil {
     private String numero_telemovel;
     private String foto_url;
     private String data_registo;
+    private List<Visita> historico_ginasios_visitados = new ArrayList<>();
 
     // Construtor vazio obrigatório para o Firestore
     public Perfil() {}
@@ -23,6 +27,21 @@ public class Perfil {
         this.numero_telemovel = numero_telemovel;
         this.foto_url = foto_url;
         this.data_registo = data_registo;
+        this.historico_ginasios_visitados = new ArrayList<>();
+    }
+
+    public Perfil(String id, String nome_completo, String username, String email,
+                  String data_nascimento, String numero_telemovel, String foto_url, String data_registo,
+                  List<Visita> historico_ginasios_visitados) {
+        this.id = id;
+        this.nome_completo = nome_completo;
+        this.username = username;
+        this.email = email;
+        this.data_nascimento = data_nascimento;
+        this.numero_telemovel = numero_telemovel;
+        this.foto_url = foto_url;
+        this.data_registo = data_registo;
+        this.historico_ginasios_visitados = historico_ginasios_visitados != null ? historico_ginasios_visitados : new ArrayList<>();
     }
 
     // Getters e Setters
@@ -49,4 +68,9 @@ public class Perfil {
 
     public String getData_registo() { return data_registo; }
     public void setData_registo(String data_registo) { this.data_registo = data_registo; }
+
+    public List<Visita> getHistorico_ginasios_visitados() { return historico_ginasios_visitados; }
+    public void setHistorico_ginasios_visitados(List<Visita> historico_ginasios_visitados) {
+        this.historico_ginasios_visitados = historico_ginasios_visitados != null ? historico_ginasios_visitados : new ArrayList<>();
+    }
 }

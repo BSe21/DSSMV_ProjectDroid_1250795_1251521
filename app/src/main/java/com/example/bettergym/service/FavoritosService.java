@@ -6,19 +6,16 @@ import com.example.bettergym.dto.Mapper;
 import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.handler.JsonHandler;
 import com.example.bettergym.handler.NetworkHandler;
+import com.example.bettergym.helper.DateHelper;
 import com.example.bettergym.model.Favorito;
 import com.example.bettergym.model.Ginasio;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 public class FavoritosService {
     // Mantemos apenas a autenticação, o Firestore desaparece daqui!
@@ -153,9 +150,7 @@ public class FavoritosService {
                 String docId = uid + "_" + ginasio.getId();
                 String url = BuildConfig.BASE_URL + "favoritos/" + docId;
 
-                SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-                iso.setTimeZone(TimeZone.getTimeZone("UTC"));
-                String dataAtual = iso.format(new Date());
+                String dataAtual = DateHelper.obterDataAtualIso();
 
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");

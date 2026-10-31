@@ -1,5 +1,8 @@
 package com.example.bettergym.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PerfilDTO {
     private String nome_completo;
     private String username;
@@ -8,6 +11,7 @@ public class PerfilDTO {
     private String data_nascimento;
     private String data_registo;
     private String foto_url;
+    private List<VisitaDTO> historico_ginasios_visitados = new ArrayList<>();
 
     // Construtor vazio obrigatório para o Firebase
     public PerfilDTO() {}
@@ -33,4 +37,9 @@ public class PerfilDTO {
 
     public String getFoto_url() { return foto_url; }
     public void setFoto_url(String foto_url) { this.foto_url = foto_url; }
+
+    public List<VisitaDTO> getHistorico_ginasios_visitados() { return historico_ginasios_visitados; }
+    public void setHistorico_ginasios_visitados(List<VisitaDTO> historico_ginasios_visitados) {
+        this.historico_ginasios_visitados = historico_ginasios_visitados != null ? historico_ginasios_visitados : new ArrayList<>();
+    }
 }

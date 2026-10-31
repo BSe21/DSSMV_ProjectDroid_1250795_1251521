@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.example.bettergym.R;
+import com.example.bettergym.helper.Utils;
 import com.example.bettergym.model.Favorito;
 import com.example.bettergym.model.Ginasio;
 import java.util.ArrayList;
@@ -51,8 +52,7 @@ class FavoritosAdapter extends BaseAdapter {
         row.setOnClickListener(v -> abrirListener.abrir(favorito));
         ((TextView) row.findViewById(R.id.txtFavoritoNome)).setText(ginasio.getNome());
         TextView morada = row.findViewById(R.id.txtFavoritoMorada);
-        morada.setText(ginasio.getMorada() == null || ginasio.getMorada().isEmpty()
-                ? parent.getContext().getString(R.string.favorites_address_unavailable) : ginasio.getMorada());
+        morada.setText(Utils.valorOuPadrao(ginasio.getMorada(), parent.getContext().getString(R.string.favorites_address_unavailable)));
         View remover = row.findViewById(R.id.btnRemoverFavorito);
         remover.setEnabled(!aRemover.contains(favorito.getGinasio_id()));
         remover.setContentDescription(parent.getContext().getString(

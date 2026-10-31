@@ -27,7 +27,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
-
 import com.example.bettergym.R;
 import com.example.bettergym.helper.MapHelper;
 import com.example.bettergym.model.Ginasio;
@@ -70,7 +69,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final ActivityResultLauncher<String[]> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestMultiplePermissions(),
             permissoes -> {
-                if (!carregamentoAtivo) return;
+                if (!carregamentoAtivo)
+                    return;
                 uiHandler.postDelayed(limiteCarregamento, 30000);
                 if (Boolean.TRUE.equals(permissoes.get(Manifest.permission.ACCESS_FINE_LOCATION))
                         || Boolean.TRUE.equals(permissoes.get(Manifest.permission.ACCESS_COARSE_LOCATION))) {
@@ -78,8 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } else {
                     mostrarErroCarregamento(R.string.loading_permission);
                 }
-            }
-    );
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +99,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            // Aplicar padding apenas no topo e laterais; a BottomNavigationView trata do
+            // seu próprio padding inferior
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
 
@@ -135,10 +136,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
 
+            if (itemId == R.id.nav_ginasios) {
+                Intent intent = new Intent(MainActivity.this, HistoricoVisitasActivity.class);
+                startActivity(intent);
+                return false;
+            }
+
             esconderConteudo();
             if (itemId == R.id.nav_mapa) {
-                return true;
-            } else if (itemId == R.id.nav_ginasios) {
                 return true;
             }
             return false;
@@ -184,7 +189,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Ligar a lógica do cartão interativo ao mapa!
         configurarCliquesMapa();
 
-        if (!carregamentoAtivo) return;
+        if (!carregamentoAtivo)
+            return;
         atualizarProgresso(30, R.string.loading_location);
         verificarPermissaoGPS();
     }
@@ -204,12 +210,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             uiHandler.postDelayed(limiteCarregamento, 30000);
             atualizarProgresso(mMap == null ? 10 : 30,
                     mMap == null ? R.string.loading_map : R.string.loading_location);
-            if (mMap != null) verificarPermissaoGPS();
+            if (mMap != null)
+                verificarPermissaoGPS();
         });
         findViewById(R.id.btnContinuarCarregamento).setOnClickListener(v -> {
             carregamentoAtivo = false;
             tentativaCarregamento++;
-            if (pedidoLocalizacao != null) pedidoLocalizacao.cancel();
+            if (pedidoLocalizacao != null)
+                pedidoLocalizacao.cancel();
             uiHandler.removeCallbacks(limiteCarregamento);
             ecraCarregamento.setVisibility(View.GONE);
         });
@@ -217,20 +225,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         uiHandler.postDelayed(limiteCarregamento, 30000);
     }
 
-    // Apenas a UI Thread altera as Views. As percentagens representam etapas concluídas,
+    // Apenas a UI Thread altera as Views. As percentagens representam etapas
+    // concluídas,
     // e não um temporizador nem a percentagem de bytes descarregados.
     private void atualizarProgresso(int percentagem, int mensagem) {
-        if (isFinishing() || isDestroyed() || !carregamentoAtivo) return;
+        if (isFinishing() || isDestroyed() || !carregamentoAtivo)
+            return;
         barraCarregamento.setProgress(percentagem);
         txtPercentagem.setText(getString(R.string.loading_percent, percentagem));
         txtEtapa.setText(mensagem);
     }
 
     private void mostrarErroCarregamento(int mensagem) {
-        if (isFinishing() || isDestroyed() || !carregamentoAtivo) return;
+        if (isFinishing() || isDestroyed() || !carregamentoAtivo)
+            return;
         carregamentoAtivo = false;
         tentativaCarregamento++;
-        if (pedidoLocalizacao != null) pedidoLocalizacao.cancel();
+        if (pedidoLocalizacao != null)
+            pedidoLocalizacao.cancel();
         uiHandler.removeCallbacks(limiteCarregamento);
         txtEtapa.setText(mensagem);
         findViewById(R.id.btnRepetirCarregamento).setVisibility(View.VISIBLE);
@@ -285,22 +297,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void verificarPermissaoGPS() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             ativarLocalizacaoECentrar();
         } else {
             // O tempo de decisão do utilizador não conta como falha de carregamento.
             uiHandler.removeCallbacks(limiteCarregamento);
-            requestPermissionLauncher.launch(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION});
+            requestPermissionLauncher.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION });
         }
     }
 
     @SuppressLint("MissingPermission")
     private void ativarLocalizacaoECentrar() {
-        if (mMap == null || !carregamentoAtivo) return;
+        if (mMap == null || !carregamentoAtivo)
+            return;
 
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -310,23 +323,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 || lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
 
         if (!gpsAtivo) {
-            Toast.makeText(this, "Por favor, ativa a Localização (GPS) nas definições do telemóvel", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Por favor, ativa a Localização (GPS) nas definições do telemóvel", Toast.LENGTH_LONG)
+                    .show();
             mostrarErroCarregamento(R.string.loading_no_location);
             return;
         }
 
         final int tentativa = ++tentativaCarregamento;
-        if (pedidoLocalizacao != null) pedidoLocalizacao.cancel();
+        if (pedidoLocalizacao != null)
+            pedidoLocalizacao.cancel();
         pedidoLocalizacao = new CancellationTokenSource();
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, cachedLocation -> {
-            if (!tentativaAtual(tentativa)) return;
+            if (!tentativaAtual(tentativa))
+                return;
             if (cachedLocation != null) {
                 processarLocalizacaoEncontrada(cachedLocation, tentativa);
             } else {
                 fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, pedidoLocalizacao.getToken())
                         .addOnSuccessListener(this, freshLocation -> {
-                            if (!tentativaAtual(tentativa)) return;
+                            if (!tentativaAtual(tentativa))
+                                return;
                             if (freshLocation != null) {
                                 processarLocalizacaoEncontrada(freshLocation, tentativa);
                             } else {
@@ -334,7 +351,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                         })
                         .addOnFailureListener(this, e -> {
-                            if (tentativaAtual(tentativa)) mostrarErroCarregamento(R.string.loading_no_location);
+                            if (tentativaAtual(tentativa))
+                                mostrarErroCarregamento(R.string.loading_no_location);
                         });
             }
         });
@@ -349,16 +367,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onProgress(int percentagem) {
                 runOnUiThread(() -> {
-                    if (!tentativaAtual(tentativa)) return;
+                    if (!tentativaAtual(tentativa))
+                        return;
                     atualizarProgresso(percentagem, percentagem == 70
-                            ? R.string.loading_received : R.string.loading_markers);
+                            ? R.string.loading_received
+                            : R.string.loading_markers);
                 });
             }
 
             @Override
             public void onSuccess(List<Ginasio> ginasios) {
                 runOnUiThread(() -> {
-                    if (!tentativaAtual(tentativa)) return;
+                    if (!tentativaAtual(tentativa))
+                        return;
                     desenharMarcadores(ginasios);
                     atualizarProgresso(100, R.string.loading_done);
                     carregamentoAtivo = false;
@@ -374,14 +395,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onError(Exception e) {
                 runOnUiThread(() -> {
-                    if (tentativaAtual(tentativa)) mostrarErroCarregamento(R.string.loading_network_error);
+                    if (tentativaAtual(tentativa))
+                        mostrarErroCarregamento(R.string.loading_network_error);
                 });
             }
         });
     }
 
     private void desenharMarcadores(List<Ginasio> ginasios) {
-        if (mMap == null) return;
+        if (mMap == null)
+            return;
         mMap.clear();
 
         for (Ginasio g : ginasios) {
@@ -404,7 +427,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         carregamentoAtivo = false;
         tentativaCarregamento++;
         uiHandler.removeCallbacksAndMessages(null);
-        if (pedidoLocalizacao != null) pedidoLocalizacao.cancel();
+        if (pedidoLocalizacao != null)
+            pedidoLocalizacao.cancel();
         super.onDestroy();
     }
 }

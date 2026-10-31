@@ -5,14 +5,34 @@ public class Visita {
     private String user_id;
     private String ginasio_id;
     private String data_visita;
+    private String nome_ginasio;
 
     public Visita() {}
+
+    public Visita(String ginasio_id, String data_visita) {
+        this.ginasio_id = ginasio_id;
+        this.data_visita = data_visita;
+    }
+
+    public Visita(String ginasio_id, String data_visita, String nome_ginasio) {
+        this.ginasio_id = ginasio_id;
+        this.data_visita = data_visita;
+        this.nome_ginasio = nome_ginasio;
+    }
 
     public Visita(String id, String user_id, String ginasio_id, String data_visita) {
         this.id = id;
         this.user_id = user_id;
         this.ginasio_id = ginasio_id;
         this.data_visita = data_visita;
+    }
+
+    public Visita(String id, String user_id, String ginasio_id, String data_visita, String nome_ginasio) {
+        this.id = id;
+        this.user_id = user_id;
+        this.ginasio_id = ginasio_id;
+        this.data_visita = data_visita;
+        this.nome_ginasio = nome_ginasio;
     }
 
     public String getId() { return id; }
@@ -26,4 +46,7 @@ public class Visita {
 
     public String getData_visita() { return data_visita; }
     public void setData_visita(String data_visita) { this.data_visita = data_visita; }
+
+    public String getNome_ginasio() { return nome_ginasio; }
+    public void setNome_ginasio(String nome_ginasio) { this.nome_ginasio = nome_ginasio; }
 }

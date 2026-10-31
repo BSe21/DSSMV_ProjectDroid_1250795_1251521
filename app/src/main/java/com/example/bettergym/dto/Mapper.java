@@ -5,6 +5,7 @@ import com.example.bettergym.model.Ginasio;
 import com.example.bettergym.model.Favorito;
 import com.example.bettergym.model.Perfil;
 import com.example.bettergym.model.Avaliacao;
+import com.example.bettergym.model.Visita;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,6 @@ public class Mapper {
                 dto.getReferenciaFoto()
         );
 
-
         if (dto.getAvaliacoes() != null) {
             List<Avaliacao> listaAvaliacoesModel = new ArrayList<>();
             for (AvaliacaoDTO avaliacaoDTO : dto.getAvaliacoes()) {
@@ -42,19 +42,43 @@ public class Mapper {
             ginasio.setFotos(dto.getFotos());
         }
 
-
         return ginasio;
     }
 
     public static List<Ginasio> toModelList(List<PlaceGymDTO> dtos) {
         List<Ginasio> models = new ArrayList<>();
+        if (dtos == null) return models;
         for (PlaceGymDTO dto : dtos) {
-            models.add(toModel(dto));
+            if (isGinasioValido(dto)) {
+                models.add(toModel(dto));
+            }
         }
         return models;
     }
 
+    private static boolean isGinasioValido(PlaceGymDTO dto) {
+        if (dto == null || dto.getNome() == null) return false;
+        String nome = dto.getNome().toLowerCase().trim();
 
+        // Se tiver palavras diretamente associadas a ginásios/fitness, aceita sempre
+        if (nome.contains("ginásio") || nome.contains("ginasio") || nome.contains("gym") ||
+                nome.contains("fitness") || nome.contains("crossfit") || nome.contains("studio") ||
+                nome.contains("training") || nome.contains("workout")) {
+            // Exceto se for calistenia de rua / parque público
+            if (nome.contains("street workout")) return false;
+            return true;
+        }
+
+        // Excluir recintos desportivos que não são ginásios convencionais para frequentar
+        if (nome.contains("estádio") || nome.contains("estadio") ||
+                nome.contains("futebol") || nome.contains("basquetebol") ||
+                nome.contains("piscina") || nome.contains("polidesportivo") ||
+                nome.contains("parque infantil") || nome.contains("street workout")) {
+            return false;
+        }
+
+        return true;
+    }
 
     public static Perfil toModel(String id, PerfilDTO dto) {
         if (dto == null) return null;
@@ -62,8 +86,16 @@ public class Mapper {
             throw new DataConsistencyException("Inconsistência nos dados do perfil: ID de utilizador em falta.");
         }
 
-        // Passar os dados EXATAMENTE na ordem do construtor:
-        // id, nome, username, email, nascimento, telemovel, foto, registo
+        List<Visita> historicoModel = new ArrayList<>();
+        if (dto.getHistorico_ginasios_visitados() != null) {
+            for (VisitaDTO vDto : dto.getHistorico_ginasios_visitados()) {
+                Visita v = toModel(vDto);
+                if (v != null) {
+                    historicoModel.add(v);
+                }
+            }
+        }
+
         return new Perfil(
                 id,
                 dto.getNome_completo(),
@@ -72,7 +104,8 @@ public class Mapper {
                 dto.getData_nascimento(),
                 dto.getNumero_telemovel(),
                 dto.getFoto_url(),
-                dto.getData_registo()
+                dto.getData_registo(),
+                historicoModel
         );
     }
 
@@ -118,6 +151,7 @@ public class Mapper {
         dto.setData_avaliacao(avaliacao.getData_avaliacao());
         return dto;
     }
+
     public static Avaliacao toModel(AvaliacaoDTO dto) {
         if (dto == null) return null;
 
@@ -129,5 +163,18 @@ public class Mapper {
                 dto.getDescricao(),
                 dto.getData_avaliacao()
         );
+    }
+
+    public static Visita toModel(VisitaDTO dto) {
+        if (dto == null) return null;
+        if (dto.getGinasio_id() == null || dto.getGinasio_id().trim().isEmpty()) {
+            throw new DataConsistencyException("Inconsistência nos dados da visita: ID do ginásio em falta.");
+        }
+        return new Visita(dto.getGinasio_id(), dto.getData_visita(), dto.getNome_ginasio());
+    }
+
+    public static VisitaDTO toDTO(Visita visita) {
+        if (visita == null) return null;
+        return new VisitaDTO(visita.getGinasio_id(), visita.getData_visita(), visita.getNome_ginasio());
     }
 }

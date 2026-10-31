@@ -1,17 +1,21 @@
 package com.example.bettergym.helper;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class Utils {
+
+    /**
+     * Retorna o valor padrão se o texto for nulo ou vazio.
+     */
+    public static String valorOuPadrao(String valor, String padrao) {
+        return (valor == null || valor.trim().isEmpty()) ? padrao : valor;
+    }
 
     /**
      * Retorna "—" se o valor for nulo ou vazio, caso contrário retorna o valor.
      */
     public static String valorOuTraco(String valor) {
-        return (valor == null || valor.trim().isEmpty()) ? "—" : valor;
+        return valorOuPadrao(valor, "—");
     }
 
     /**
@@ -27,17 +31,19 @@ public class Utils {
     }
 
     /**
-     * Converte a data do formato ISO (da base de dados) para o formato DD/MM/YYYY.
+     * Converte data ISO para exibição no perfil "DD/MM/YYYY" através do DateHelper.
      */
     public static String formatarDataRegisto(String dataIso) {
-        if (dataIso == null || dataIso.trim().isEmpty()) return "—";
-        try {
-            SimpleDateFormat entrada = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-            entrada.setTimeZone(TimeZone.getTimeZone("UTC"));
-            Date data = entrada.parse(dataIso);
-            return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(data);
-        } catch (Exception e) {
-            return dataIso; // Se falhar a conversão, devolve o texto original
+        return DateHelper.formatarDataSimples(dataIso);
+    }
+
+    /**
+     * Formata a classificação e número de avaliações do ginásio (ex: "★ 4.5 (120 avaliações)").
+     */
+    public static String formatarRating(double rating, int numAvaliacoes) {
+        if (numAvaliacoes > 0) {
+            return String.format(Locale.getDefault(), "★ %.1f (%d avaliações)", rating, numAvaliacoes);
         }
+        return "Ainda sem avaliações públicas";
     }
 }

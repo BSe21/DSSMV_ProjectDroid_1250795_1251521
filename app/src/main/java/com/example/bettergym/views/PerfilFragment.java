@@ -54,13 +54,18 @@ public class PerfilFragment extends Fragment {
         inicializarViews(view);
 
         btnLogout.setOnClickListener(v -> terminarSessao());
+
+        View cardVisitas = view.findViewById(R.id.cardVisitas);
+        if (cardVisitas != null) {
+            cardVisitas.setOnClickListener(v -> startActivity(new Intent(requireContext(), HistoricoVisitasActivity.class)));
+        }
+
         view.findViewById(R.id.btnAlterarPassword).setOnClickListener(v -> {
             if (getChildFragmentManager().findFragmentByTag("alterar_password") == null) {
                 new AlterarPasswordDialogFragment().show(getChildFragmentManager(), "alterar_password");
             }
         });
 
-        // 2. Pede os dados ao Serviço (o serviço trata do DTO e do Mapper nos bastidores)
         // 2. Pede os dados ao Serviço
         perfilService.carregarPerfil(uid, new PerfilService.PerfilCallback() {
             @Override
@@ -88,13 +93,7 @@ public class PerfilFragment extends Fragment {
             }
         });
 
-        // 3. Pede as estatísticas ao Serviço (Também têm de voltar à Thread do Ecrã)
-        perfilService.contarEstatistica("visitas", uid, contagem -> {
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> { if (isAdded()) txtVisitas.setText(String.valueOf(contagem)); });
-            }
-        });
-
+        // 3. Pede as restantes estatísticas ao Serviço
         perfilService.contarEstatistica("favoritos", uid, contagem -> {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> { if (isAdded()) txtFavoritos.setText(String.valueOf(contagem)); });
@@ -106,11 +105,6 @@ public class PerfilFragment extends Fragment {
                 getActivity().runOnUiThread(() -> { if (isAdded()) txtAvaliacoes.setText(String.valueOf(contagem)); });
             }
         });
-
-        // 3. Pede as estatísticas ao Serviço
-        perfilService.contarEstatistica("visitas", uid, contagem -> { if (isAdded()) txtVisitas.setText(String.valueOf(contagem)); });
-        perfilService.contarEstatistica("favoritos", uid, contagem -> { if (isAdded()) txtFavoritos.setText(String.valueOf(contagem)); });
-        perfilService.contarEstatistica("avaliacoes", uid, contagem -> { if (isAdded()) txtAvaliacoes.setText(String.valueOf(contagem)); });
     }
 
     private void inicializarViews(View view) {
@@ -137,6 +131,13 @@ public class PerfilFragment extends Fragment {
         txtNascimento.setText(Utils.valorOuTraco(perfil.getData_nascimento()));
         txtMembroDesde.setText(Utils.formatarDataRegisto(perfil.getData_registo()));
         txtIniciais.setText(Utils.iniciais(perfil.getNome_completo()));
+
+        // Contagem de visitas a partir do historico_ginasios_visitados do perfil
+        if (perfil.getHistorico_ginasios_visitados() != null) {
+            txtVisitas.setText(String.valueOf(perfil.getHistorico_ginasios_visitados().size()));
+        } else {
+            txtVisitas.setText("0");
+        }
 
         String foto = perfil.getFoto_url();
         if (foto != null && foto.startsWith("http")) {

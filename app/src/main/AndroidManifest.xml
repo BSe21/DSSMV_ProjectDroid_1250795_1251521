@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <application
             android:allowBackup="true"
@@ -18,7 +21,13 @@
 
         <activity
                 android:name=".views.DetalheGinasioActivity"
-                android:exported="false"/> <!-- Chave de API do Google Maps Platform -->
+                android:exported="false"/>
+
+        <activity
+                android:name=".views.HistoricoVisitasActivity"
+                android:exported="false"/>
+
+        <!-- Chave de API do Google Maps Platform -->
         <meta-data
                 android:name="com.google.android.geo.API_KEY"
                 android:value="${MAPS_API_KEY}"/>

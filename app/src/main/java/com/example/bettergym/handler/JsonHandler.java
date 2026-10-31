@@ -7,6 +7,7 @@ import com.example.bettergym.dto.PlaceGymDTO;
 import com.example.bettergym.dto.PerfilDTO;
 import com.example.bettergym.dto.FavoritoDTO;
 import com.example.bettergym.dto.AvaliacaoDTO;
+import com.example.bettergym.dto.VisitaDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,6 +141,46 @@ public class JsonHandler {
                     dto.setFoto_url(fields.getJSONObject("foto_url").optString("stringValue", ""));
                 }
 
+                if (fields.has("historico_ginasios_visitados")) {
+                    JSONObject histObj = fields.optJSONObject("historico_ginasios_visitados");
+                    if (histObj != null && histObj.has("arrayValue")) {
+                        JSONObject arrayVal = histObj.optJSONObject("arrayValue");
+                        if (arrayVal != null && arrayVal.has("values")) {
+                            JSONArray valArray = arrayVal.optJSONArray("values");
+                            if (valArray != null) {
+                                List<VisitaDTO> visitas = new ArrayList<>();
+                                for (int i = 0; i < valArray.length(); i++) {
+                                    JSONObject item = valArray.optJSONObject(i);
+                                    if (item != null && item.has("mapValue")) {
+                                        JSONObject mapVal = item.optJSONObject("mapValue");
+                                        if (mapVal != null && mapVal.has("fields")) {
+                                            JSONObject vFields = mapVal.optJSONObject("fields");
+                                            if (vFields != null) {
+                                                String gId = "";
+                                                String dVisita = "";
+                                                String nGinasio = "";
+                                                if (vFields.has("ginasio_id")) {
+                                                    gId = vFields.getJSONObject("ginasio_id").optString("stringValue", "");
+                                                }
+                                                if (vFields.has("data_visita")) {
+                                                    dVisita = vFields.getJSONObject("data_visita").optString("stringValue", "");
+                                                }
+                                                if (vFields.has("nome_ginasio")) {
+                                                    nGinasio = vFields.getJSONObject("nome_ginasio").optString("stringValue", "");
+                                                } else if (vFields.has("nome")) {
+                                                    nGinasio = vFields.getJSONObject("nome").optString("stringValue", "");
+                                                }
+                                                visitas.add(new VisitaDTO(gId, dVisita, nGinasio));
+                                            }
+                                        }
+                                    }
+                                }
+                                dto.setHistorico_ginasios_visitados(visitas);
+                            }
+                        }
+                    }
+                }
+
                 return dto;
             }
         } catch (Exception e) {
@@ -149,8 +190,49 @@ public class JsonHandler {
     }
 
     // ----------------------------------------------------------------------------------
-    // DESERIALIZAR A LISTA DE FAVORITOS DO FIREBASE (REST API)
+    // SERIALIZAR O HISTÓRICO DE VISITAS PARA FIREBASE (REST API)
     // ----------------------------------------------------------------------------------
+    public static String serializeHistoricoVisitasFirebaseJson(List<VisitaDTO> visitas) throws JSONException {
+        JSONObject root = new JSONObject();
+        JSONObject fields = new JSONObject();
+        JSONObject histObj = new JSONObject();
+        JSONObject arrayValue = new JSONObject();
+        JSONArray values = new JSONArray();
+
+        if (visitas != null) {
+            for (VisitaDTO v : visitas) {
+                JSONObject item = new JSONObject();
+                JSONObject mapValue = new JSONObject();
+                JSONObject itemFields = new JSONObject();
+
+                JSONObject gIdObj = new JSONObject();
+                gIdObj.put("stringValue", v.getGinasio_id() != null ? v.getGinasio_id() : "");
+                itemFields.put("ginasio_id", gIdObj);
+
+                JSONObject dVisitaObj = new JSONObject();
+                dVisitaObj.put("stringValue", v.getData_visita() != null ? v.getData_visita() : "");
+                itemFields.put("data_visita", dVisitaObj);
+
+                if (v.getNome_ginasio() != null && !v.getNome_ginasio().isEmpty()) {
+                    JSONObject nObj = new JSONObject();
+                    nObj.put("stringValue", v.getNome_ginasio());
+                    itemFields.put("nome_ginasio", nObj);
+                }
+
+                mapValue.put("fields", itemFields);
+                item.put("mapValue", mapValue);
+                values.put(item);
+            }
+        }
+
+        arrayValue.put("values", values);
+        histObj.put("arrayValue", arrayValue);
+        fields.put("historico_ginasios_visitados", histObj);
+        root.put("fields", fields);
+
+        return root.toString();
+    }
+
     // ----------------------------------------------------------------------------------
     // DESERIALIZAR A LISTA DE FAVORITOS DO FIREBASE (REST API)
     // ----------------------------------------------------------------------------------
@@ -208,7 +290,4 @@ public class JsonHandler {
         }
         return lista;
     }
-
-
-
 }
