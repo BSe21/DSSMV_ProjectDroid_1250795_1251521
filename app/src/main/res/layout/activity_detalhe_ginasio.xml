@@ -1,181 +1,227 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FAFAFA"
-        android:fillViewport="true">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FAFAFA">
 
+    <!-- Barra superior mantida sempre no topo para permitir voltar mesmo a carregar -->
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVoltar"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Voltar"
+            android:textColor="@color/primary"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:iconTint="@color/primary" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btnFavorito"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="10dp"
+            android:enabled="false"
+            android:contentDescription="@string/favorites_add"
+            app:srcCompat="@drawable/ic_favorito_contorno" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Conteúdo Completo (visível após carregar) -->
+        <ScrollView
+            android:id="@+id/scrollConteudoDetalhes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:visibility="gone">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="8dp"
-                android:paddingEnd="12dp">
-
-            <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnVoltar"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="Voltar"
-                    android:textColor="@color/primary"
-                    app:icon="@drawable/ic_arrow_back"
-                    app:iconGravity="textStart"
-                    app:iconPadding="8dp"
-                    app:iconTint="@color/primary" />
-
-            <Space android:layout_width="0dp" android:layout_height="1dp"
-                    android:layout_weight="1" />
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                    android:id="@+id/btnFavorito"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="10dp"
-                    android:enabled="false"
-                    android:contentDescription="@string/favorites_add"
-                    app:srcCompat="@drawable/ic_favorito_contorno" />
-        </LinearLayout>
-
-        <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:background="#DCE5EA">
-
-            <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/viewPagerFotos"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
-
-            <TextView
-                    android:id="@+id/txtSemFoto"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="Sem fotos disponíveis"
-                    android:textColor="#52636E"
-                    android:textSize="16sp" />
-
-            <TextView
-                    android:id="@+id/txtIndicadorFotos"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|end"
-                    android:layout_margin="12dp"
-                    android:background="@drawable/bg_contador_fotos"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
-        </FrameLayout>
-
-        <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:orientation="vertical">
 
-            <TextView
-                    android:id="@+id/txtNomeGinasio"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/primary"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
+                    android:layout_height="220dp"
+                    android:background="#DCE5EA">
 
-            <TextView
-                    android:id="@+id/txtMoradaGinasio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textColor="#4C5963"
-                    android:textSize="16sp" />
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/viewPagerFotos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:visibility="gone" />
 
-            <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRegistarVisita"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="18dp"
-                    android:text="Registar Visita (QR Code)"
-                    android:textAllCaps="false"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    app:backgroundTint="@color/primary"
-                    app:cornerRadius="12dp"
-                    app:icon="@drawable/ic_qr_code"
-                    app:iconTint="@color/white"
-                    app:iconGravity="textStart"
-                    app:iconPadding="10dp" />
+                    <TextView
+                        android:id="@+id/txtSemFoto"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="Sem fotos disponíveis"
+                        android:textColor="#52636E"
+                        android:textSize="16sp" />
 
-            <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E3E8EE"
-                    app:strokeWidth="1dp">
+                    <TextView
+                        android:id="@+id/txtIndicadorFotos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/bg_contador_fotos"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
 
                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:id="@+id/txtNomeGinasio"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="18dp">
+                        android:textColor="@color/primary"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
 
                     <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Estado"
-                            android:textColor="#66747D"
-                            android:textSize="13sp" />
+                        android:id="@+id/txtMoradaGinasio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textColor="#4C5963"
+                        android:textSize="16sp" />
 
-                    <TextView
-                            android:id="@+id/txtEstadoGinasio"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRegistarVisita"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="18dp"
+                        android:text="Registar Visita (QR Code)"
+                        android:textAllCaps="false"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_qr_code"
+                        app:iconTint="@color/white"
+                        app:iconGravity="textStart"
+                        app:iconPadding="10dp" />
 
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="18dp"
-                            android:text="Avaliações Google"
-                            android:textColor="#66747D"
-                            android:textSize="13sp" />
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#E3E8EE"
+                        app:strokeWidth="1dp">
 
-                    <TextView
-                            android:id="@+id/txtRatingGinasio"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/primary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                    <ListView
-                            android:id="@+id/listViewAvaliacoes"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:nestedScrollingEnabled="true" />
+                            android:orientation="vertical"
+                            android:padding="18dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Estado"
+                                android:textColor="#66747D"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/txtEstadoGinasio"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="18dp"
+                                android:text="Avaliações Google"
+                                android:textColor="#66747D"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/txtRatingGinasio"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:textColor="@color/primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <ListView
+                                android:id="@+id/listViewAvaliacoes"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:nestedScrollingEnabled="true" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Indicador de Carregamento Centralizado -->
+        <LinearLayout
+            android:id="@+id/layoutCarregamentoDetalhes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/progressoDetalhes"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:indeterminateTint="@color/primary" />
+
+            <TextView
+                android:id="@+id/txtCarregandoDetalhes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/gym_details_loading"
+                android:textColor="@color/primary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </FrameLayout>
+</LinearLayout>

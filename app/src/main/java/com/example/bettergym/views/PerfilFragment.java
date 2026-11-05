@@ -28,9 +28,11 @@ public class PerfilFragment extends Fragment {
 
     private ImageView imgFotoPerfil;
     private TextView txtIniciais, txtNome, txtUsername;
-    private TextView txtVisitas, txtFavoritos, txtAvaliacoes;
+    private TextView txtVisitas, txtFavoritos;
     private TextView txtEmail, txtTelemovel, txtNascimento, txtMembroDesde;
     private MaterialButton btnLogout;
+    private View layoutCarregamentoPerfil;
+    private View scrollConteudoPerfil;
 
     @Nullable
     @Override
@@ -84,6 +86,8 @@ public class PerfilFragment extends Fragment {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         if (isAdded()) {
+                            if (layoutCarregamentoPerfil != null) layoutCarregamentoPerfil.setVisibility(View.GONE);
+                            if (scrollConteudoPerfil != null) scrollConteudoPerfil.setVisibility(View.VISIBLE);
                             txtNome.setText("—");
                             String msg = e instanceof DataConsistencyException ? ((DataConsistencyException) e).what() : e.getMessage();
                             Toast.makeText(requireContext(), "Erro ao carregar perfil: " + msg, Toast.LENGTH_LONG).show();
@@ -99,22 +103,17 @@ public class PerfilFragment extends Fragment {
                 getActivity().runOnUiThread(() -> { if (isAdded()) txtFavoritos.setText(String.valueOf(contagem)); });
             }
         });
-
-        perfilService.contarEstatistica("avaliacoes", uid, contagem -> {
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> { if (isAdded()) txtAvaliacoes.setText(String.valueOf(contagem)); });
-            }
-        });
     }
 
     private void inicializarViews(View view) {
+        layoutCarregamentoPerfil = view.findViewById(R.id.layoutCarregamentoPerfil);
+        scrollConteudoPerfil = view.findViewById(R.id.scrollConteudoPerfil);
         imgFotoPerfil = view.findViewById(R.id.imgFotoPerfil);
         txtIniciais = view.findViewById(R.id.txtIniciais);
         txtNome = view.findViewById(R.id.txtNome);
         txtUsername = view.findViewById(R.id.txtUsername);
         txtVisitas = view.findViewById(R.id.txtVisitas);
         txtFavoritos = view.findViewById(R.id.txtFavoritos);
-        txtAvaliacoes = view.findViewById(R.id.txtAvaliacoes);
         txtEmail = view.findViewById(R.id.txtEmail);
         txtTelemovel = view.findViewById(R.id.txtTelemovel);
         txtNascimento = view.findViewById(R.id.txtNascimento);
@@ -123,6 +122,9 @@ public class PerfilFragment extends Fragment {
     }
 
     private void mostrarPerfil(Perfil perfil) {
+        if (layoutCarregamentoPerfil != null) layoutCarregamentoPerfil.setVisibility(View.GONE);
+        if (scrollConteudoPerfil != null) scrollConteudoPerfil.setVisibility(View.VISIBLE);
+
         // Usa o helper Utils para formatar o texto e proteger contra Nulos
         txtNome.setText(Utils.valorOuTraco(perfil.getNome_completo()));
         txtUsername.setText(perfil.getUsername() == null || perfil.getUsername().isEmpty() ? "" : "@" + perfil.getUsername());

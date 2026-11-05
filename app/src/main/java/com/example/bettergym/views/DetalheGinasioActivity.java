@@ -48,6 +48,8 @@ public class DetalheGinasioActivity extends AppCompatActivity {
     private TextView txtSemFoto;
     private AppCompatImageButton btnFavorito;
     private MaterialButton btnRegistarVisita;
+    private View layoutCarregamentoDetalhes;
+    private View scrollConteudoDetalhes;
     private Ginasio ginasio;
     private FavoritosService favoritosService;
     private PlacesService placesService;
@@ -63,8 +65,7 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                 } else {
                     processarResultadoQr(result.getContents());
                 }
-            }
-    );
+            });
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -72,10 +73,10 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                 if (isGranted) {
                     iniciarLeituraQr();
                 } else {
-                    Toast.makeText(this, "Permissão da câmara necessária para ler o QR Code.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permissão da câmara necessária para ler o QR Code.", Toast.LENGTH_LONG)
+                            .show();
                 }
-            }
-    );
+            });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -108,6 +109,9 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         placesService = new PlacesService();
         visitasService = new VisitasService();
 
+        layoutCarregamentoDetalhes = findViewById(R.id.layoutCarregamentoDetalhes);
+        scrollConteudoDetalhes = findViewById(R.id.scrollConteudoDetalhes);
+
         btnFavorito = findViewById(R.id.btnFavorito);
         btnFavorito.setOnClickListener(v -> alternarFavorito());
 
@@ -118,7 +122,8 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         // Apanhar o ID diretamente do Intent
         String ginasioId = getIntent().getStringExtra(EXTRA_GINASIO_ID);
 
-        // Se temos ID, vamos SEMPRE à Google buscar os dados atualizados (incluindo as reviews)
+        // Se temos ID, vamos SEMPRE à Google buscar os dados atualizados (incluindo as
+        // reviews)
         if (ginasioId != null && !ginasioId.isEmpty()) {
             carregarDetalhesDaGoogle(ginasioId);
         } else {
@@ -129,11 +134,21 @@ public class DetalheGinasioActivity extends AppCompatActivity {
     }
 
     private void carregarDetalhesDaGoogle(String placeId) {
+        if (layoutCarregamentoDetalhes != null)
+            layoutCarregamentoDetalhes.setVisibility(View.VISIBLE);
+        if (scrollConteudoDetalhes != null)
+            scrollConteudoDetalhes.setVisibility(View.GONE);
+
         placesService.obterDetalhesGinasio(placeId, new PlacesService.OnGymDetailsLoadedListener() {
             @Override
             public void onSuccess(Ginasio ginasioReal) {
                 runOnUiThread(() -> {
-                    if (isFinishing() || isDestroyed()) return;
+                    if (isFinishing() || isDestroyed())
+                        return;
+                    if (layoutCarregamentoDetalhes != null)
+                        layoutCarregamentoDetalhes.setVisibility(View.GONE);
+                    if (scrollConteudoDetalhes != null)
+                        scrollConteudoDetalhes.setVisibility(View.VISIBLE);
                     ginasio = ginasioReal;
                     preencherDados(ginasio);
                     // Assim que os dados chegam, verifica o estado do favorito
@@ -144,9 +159,13 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             @Override
             public void onError(Exception erro) {
                 runOnUiThread(() -> {
-                    if (isFinishing() || isDestroyed()) return;
+                    if (isFinishing() || isDestroyed())
+                        return;
+                    if (layoutCarregamentoDetalhes != null)
+                        layoutCarregamentoDetalhes.setVisibility(View.GONE);
                     Log.e("DetalheGinasio", "Erro ao carregar detalhes", erro);
-                    String msg = erro != null && erro.getMessage() != null ? erro.getMessage() : "Erro ao carregar detalhes.";
+                    String msg = erro != null && erro.getMessage() != null ? erro.getMessage()
+                            : "Erro ao carregar detalhes.";
                     Toast.makeText(DetalheGinasioActivity.this, msg, Toast.LENGTH_SHORT).show();
                     finish();
                 });
@@ -163,8 +182,7 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             return;
         }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             iniciarLeituraQr();
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
@@ -199,16 +217,19 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             @Override
             public void onSucesso() {
                 runOnUiThread(() -> {
-                    if (isFinishing() || isDestroyed()) return;
+                    if (isFinishing() || isDestroyed())
+                        return;
                     btnRegistarVisita.setEnabled(true);
-                    Toast.makeText(DetalheGinasioActivity.this, "Visita registada com sucesso! 🏋️‍♂️", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DetalheGinasioActivity.this, "Visita registada com sucesso! 🏋️‍♂️",
+                            Toast.LENGTH_LONG).show();
                 });
             }
 
             @Override
             public void onErro(Exception erro) {
                 runOnUiThread(() -> {
-                    if (isFinishing() || isDestroyed()) return;
+                    if (isFinishing() || isDestroyed())
+                        return;
                     btnRegistarVisita.setEnabled(true);
                     String msg = "Erro ao registar visita.";
                     if (erro instanceof InvalidDataException) {
@@ -233,10 +254,12 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                     @Override
                     public void onResultado(boolean guardado) {
                         runOnUiThread(() -> {
-                            if (isFinishing() || isDestroyed()) return;
+                            if (isFinishing() || isDestroyed())
+                                return;
                             favorito = guardado;
                             estadoConhecido = true;
-                            if (erroFavorito != null) erroFavorito.dismiss();
+                            if (erroFavorito != null)
+                                erroFavorito.dismiss();
                             atualizarEstrela();
                         });
                     }
@@ -244,11 +267,12 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                     @Override
                     public void onErro(Exception erro) {
                         runOnUiThread(() -> {
-                            if (isFinishing() || isDestroyed()) return;
+                            if (isFinishing() || isDestroyed())
+                                return;
                             estadoConhecido = false;
                             atualizarEstrela();
                             erroFavorito = Snackbar.make(btnFavorito, R.string.favorites_error,
-                                            Snackbar.LENGTH_INDEFINITE)
+                                    Snackbar.LENGTH_INDEFINITE)
                                     .setAction(R.string.loading_retry, v -> observarFavorito());
                             erroFavorito.show();
                         });
@@ -257,7 +281,8 @@ public class DetalheGinasioActivity extends AppCompatActivity {
     }
 
     private void alternarFavorito() {
-        if (!estadoConhecido || aGuardar) return;
+        if (!estadoConhecido || aGuardar)
+            return;
         boolean adicionar = !favorito;
         aGuardar = true;
         atualizarEstrela();
@@ -266,12 +291,14 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             public void onSucesso() {
                 runOnUiThread(() -> {
                     aGuardar = false;
-                    if (isFinishing() || isDestroyed()) return;
+                    if (isFinishing() || isDestroyed())
+                        return;
 
                     favorito = adicionar;
                     atualizarEstrela();
                     Toast.makeText(DetalheGinasioActivity.this, adicionar
-                            ? R.string.favorites_added : R.string.favorites_removed, Toast.LENGTH_SHORT).show();
+                            ? R.string.favorites_added
+                            : R.string.favorites_removed, Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -279,7 +306,8 @@ public class DetalheGinasioActivity extends AppCompatActivity {
             public void onErro(Exception erro) {
                 runOnUiThread(() -> {
                     aGuardar = false;
-                    if (isFinishing() || isDestroyed()) return;
+                    if (isFinishing() || isDestroyed())
+                        return;
                     atualizarEstrela();
                     String msg = getString(R.string.favorites_write_error);
                     if (erro instanceof InvalidDataException) {
@@ -293,27 +321,32 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                 });
             }
         };
-        if (adicionar) favoritosService.guardar(ginasio, callback);
-        else favoritosService.remover(ginasio.getId(), callback);
+        if (adicionar)
+            favoritosService.guardar(ginasio, callback);
+        else
+            favoritosService.remover(ginasio.getId(), callback);
     }
 
     private void atualizarEstrela() {
         btnFavorito.setImageResource(favorito ? R.drawable.ic_favorito_preenchido
                 : R.drawable.ic_favorito_contorno);
         btnFavorito.setContentDescription(getString(favorito
-                ? R.string.favorites_remove : R.string.favorites_add));
+                ? R.string.favorites_remove
+                : R.string.favorites_add));
         btnFavorito.setEnabled(estadoConhecido && !aGuardar);
     }
 
     @Override
     protected void onStop() {
-        if (erroFavorito != null) erroFavorito.dismiss();
+        if (erroFavorito != null)
+            erroFavorito.dismiss();
         super.onStop();
     }
 
     private void preencherDados(Ginasio ginasio) {
         ((TextView) findViewById(R.id.txtNomeGinasio)).setText(ginasio.getNome());
-        ((TextView) findViewById(R.id.txtMoradaGinasio)).setText(Utils.valorOuPadrao(ginasio.getMorada(), "Morada não disponível"));
+        ((TextView) findViewById(R.id.txtMoradaGinasio))
+                .setText(Utils.valorOuPadrao(ginasio.getMorada(), "Morada não disponível"));
 
         TextView txtEstado = findViewById(R.id.txtEstadoGinasio);
         if (ginasio.isAbertoAgora()) {

@@ -42,4 +42,6 @@
     <string name="favorites_added">Ginásio adicionado aos favoritos.</string>
     <string name="favorites_removed">Ginásio removido dos favoritos.</string>
     <string name="favorites_address_unavailable">Morada não disponível</string>
+    <string name="gym_details_loading">A carregar detalhes do ginásio…</string>
+    <string name="profile_loading">A carregar perfil…</string>
 </resources>
