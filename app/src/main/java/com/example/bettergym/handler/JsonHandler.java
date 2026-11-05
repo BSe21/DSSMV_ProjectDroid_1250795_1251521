@@ -53,14 +53,12 @@ public class JsonHandler {
                 }
             }
 
-            // --- MUDANÇA AQUI: Navegar pelas "caixas" corretas da Google ---
             boolean isOpenNow = false;
             if (jsonChildNode.has("regularOpeningHours")) {
                 isOpenNow = jsonChildNode.getJSONObject("regularOpeningHours").optBoolean("openNow", false);
             } else if (jsonChildNode.has("currentOpeningHours")) {
                 isOpenNow = jsonChildNode.getJSONObject("currentOpeningHours").optBoolean("openNow", false);
             }
-            // ----------------------------------------------------------------
 
             List<AvaliacaoDTO> listaAvaliacoes = new ArrayList<>();
             if (jsonChildNode.has("reviews")) {
@@ -70,17 +68,14 @@ public class JsonHandler {
                     JSONObject reviewObj = reviewsArray.getJSONObject(j);
                     AvaliacaoDTO avaliacaoDTO = new AvaliacaoDTO();
 
-                    avaliacaoDTO.setGinasio_id(id); // Associar ao ginásio atual
+                    avaliacaoDTO.setGinasio_id(id);
 
-                    // Obter Nome do Autor
                     if (reviewObj.has("authorAttribution")) {
                         avaliacaoDTO.setUser_id(reviewObj.getJSONObject("authorAttribution").optString("displayName", "Utilizador Anónimo"));
                     }
 
-                    // Obter Nota (Rating do Comentário)
                     avaliacaoDTO.setNota(String.valueOf(reviewObj.optInt("rating", 0)));
 
-                    // Obter Texto do Comentário
                     if (reviewObj.has("text")) {
                         avaliacaoDTO.setDescricao(reviewObj.getJSONObject("text").optString("text", ""));
                     }
@@ -100,14 +95,10 @@ public class JsonHandler {
     }
 
 
-    // ----------------------------------------------------------------------------------
-    // DESERIALIZAR O PERFIL DO FIREBASE (REST API)
-    // ----------------------------------------------------------------------------------
     public static PerfilDTO deSerializeFirebaseJson2PerfilDTO(String json) {
         try {
             JSONObject doc = new JSONObject(json);
 
-            // O Firebase envia os dados dentro da gaveta "fields"
             if (doc.has("fields")) {
                 JSONObject fields = doc.getJSONObject("fields");
 
@@ -189,9 +180,6 @@ public class JsonHandler {
         return null;
     }
 
-    // ----------------------------------------------------------------------------------
-    // SERIALIZAR O HISTÓRICO DE VISITAS PARA FIREBASE (REST API)
-    // ----------------------------------------------------------------------------------
     public static String serializeHistoricoVisitasFirebaseJson(List<VisitaDTO> visitas) throws JSONException {
         JSONObject root = new JSONObject();
         JSONObject fields = new JSONObject();
@@ -233,9 +221,6 @@ public class JsonHandler {
         return root.toString();
     }
 
-    // ----------------------------------------------------------------------------------
-    // DESERIALIZAR A LISTA DE FAVORITOS DO FIREBASE (REST API)
-    // ----------------------------------------------------------------------------------
     public static List<FavoritoDTO> deSerializeFirebaseJson2ListFavoritoDTO(String json) {
         List<FavoritoDTO> lista = new ArrayList<>();
         try {
@@ -265,19 +250,15 @@ public class JsonHandler {
                         dto.setData_adicionado(fields.getJSONObject("data_adicionado").optString("stringValue", ""));
                     }
 
-                    // AQUI ESTAVA O ERRO!
-                    // Agora vamos garantir que criamos SEMPRE um Ginasio, mesmo para dados antigos!
-                    String nomeGinasio = "Ginásio Guardado"; // Nome por defeito se faltar na base de dados
+                    String nomeGinasio = "Ginásio Guardado";
 
                     if (fields.has("nome")) {
                         nomeGinasio = fields.getJSONObject("nome").optString("stringValue", "Ginásio Guardado");
                     }
 
-                    // Criamos sempre o DTO para não dar NullPointerException no Adapter do teu amigo
                     PlaceGymDTO gymDto = new PlaceGymDTO();
                     gymDto.setId(dto.getGinasio_id());
                     gymDto.setNome(nomeGinasio);
-                    // (Opcional) Podemos pôr uma morada vazia para evitar outro erro
                     gymDto.setMorada("");
 
                     dto.setGinasio(gymDto);

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 public class FavoritosService {
-    // Mantemos apenas a autenticação, o Firestore desaparece daqui!
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
 
 
@@ -43,10 +42,6 @@ public class FavoritosService {
         return user.getUid();
     }
 
-    // -------------------------------------------------------------------
-    // 1. VERIFICAR SE É FAVORITO (GET Simples)
-    // Era o antigo 'observarEstado'
-    // -------------------------------------------------------------------
     public void verificarEstado(String ginasioId, EstadoCallback callback) {
         new Thread(() -> {
             try {
@@ -59,15 +54,13 @@ public class FavoritosService {
                 String url = BuildConfig.BASE_URL + "favoritos/" + docId;
 
                 try {
-                    // Tenta ler o documento. Se não der erro, existe (200 OK)!
                     NetworkHandler.get(url, null);
                     callback.onResultado(true);
                 } catch (Exception e) {
-                    // Se o erro for 404 Not Found, significa que o favorito não existe
                     if (e.getMessage() != null && e.getMessage().contains("404")) {
                         callback.onResultado(false);
                     } else {
-                        throw e; // Outro erro qualquer (ex: sem internet)
+                        throw e;
                     }
                 }
             } catch (Exception e) {
@@ -76,21 +69,15 @@ public class FavoritosService {
         }).start();
     }
 
-    // -------------------------------------------------------------------
-    // 2. OBTER LISTA DE FAVORITOS (POST com StructuredQuery)
-    // Era o antigo 'observarLista'
-    // -------------------------------------------------------------------
     public void obterLista(ListaCallback callback) {
         new Thread(() -> {
             try {
                 String uid = uidAtual();
-                // Endpoint para fazer queries (pesquisas avançadas)
                 String url = BuildConfig.BASE_URL.replace("/documents/", "/documents:runQuery");
 
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
 
-                // A Query: "Vai à coleção 'favoritos' onde 'user_id' == UID"
                 String jsonBody = "{"
                         + "\"structuredQuery\": {"
                         + "  \"from\": [{\"collectionId\": \"favoritos\"}],"
@@ -104,31 +91,24 @@ public class FavoritosService {
                         + "}"
                         + "}";
 
-                // 1. O Carteiro (NetworkHandler)
                 String respostaJson = NetworkHandler.post(url, jsonBody, headers);
 
-                // 2. O Desempacotador (JsonHandler) - Transforma em DTOs
                 List<FavoritoDTO> listaDtos = JsonHandler.deSerializeFirebaseJson2ListFavoritoDTO(respostaJson);
 
-                // 3. O Organizador (Mapper) - Transforma em Modelos
                 List<Favorito> favoritos = new ArrayList<>();
                 for (FavoritoDTO dto : listaDtos) {
                     Favorito f = Mapper.toModel(dto.getId(), dto);
-                    // Como combinámos, já não guardamos o modelo gigante do ginásio no firebase,
-                    // por isso se tiveres lá os dados básicos (ID e Nome), chegam para desenhar o ecrã.
                     if (f != null) {
                         favoritos.add(f);
                     }
                 }
 
-                // 4. Ordenar por data
                 favoritos.sort((a, b) -> {
                     String dataA = a.getData_adicionado() == null ? "" : a.getData_adicionado();
                     String dataB = b.getData_adicionado() == null ? "" : b.getData_adicionado();
-                    return dataB.compareTo(dataA); // Mais recentes primeiro
+                    return dataB.compareTo(dataA);
                 });
 
-                // Devolvemos à view
                 callback.onResultado(favoritos);
 
             } catch (Exception e) {
@@ -137,9 +117,6 @@ public class FavoritosService {
         }).start();
     }
 
-    // -------------------------------------------------------------------
-    // 3. GUARDAR NOVO FAVORITO (PATCH)
-    // -------------------------------------------------------------------
     public void guardar(Ginasio ginasio, EscritaCallback callback) {
         new Thread(() -> {
             try {
@@ -155,7 +132,6 @@ public class FavoritosService {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
 
-                // Montar o JSON com os dados que combinámos guardar (ID, Data e o Nome para não estar a ir buscar à Google Places de propósito)
                 String jsonBody = "{"
                         + "\"fields\": {"
                         + "  \"user_id\": { \"stringValue\": \"" + uid + "\" },"
@@ -165,7 +141,6 @@ public class FavoritosService {
                         + "}"
                         + "}";
 
-                // Usamos PATCH para criar ou atualizar o documento sem apagar o resto
                 NetworkHandler.patch(url, jsonBody, headers);
 
                 callback.onSucesso();
@@ -175,9 +150,6 @@ public class FavoritosService {
         }).start();
     }
 
-    // -------------------------------------------------------------------
-    // 4. REMOVER FAVORITO (DELETE)
-    // -------------------------------------------------------------------
     public void remover(String ginasioId, EscritaCallback callback) {
         new Thread(() -> {
             try {

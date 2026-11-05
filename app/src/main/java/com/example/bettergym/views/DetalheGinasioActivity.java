@@ -119,11 +119,8 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         btnRegistarVisita.setEnabled(false);
         btnRegistarVisita.setOnClickListener(v -> verificarPermissaoEIniciarQr());
 
-        // Apanhar o ID diretamente do Intent
         String ginasioId = getIntent().getStringExtra(EXTRA_GINASIO_ID);
 
-        // Se temos ID, vamos SEMPRE à Google buscar os dados atualizados (incluindo as
-        // reviews)
         if (ginasioId != null && !ginasioId.isEmpty()) {
             carregarDetalhesDaGoogle(ginasioId);
         } else {
@@ -151,7 +148,6 @@ public class DetalheGinasioActivity extends AppCompatActivity {
                         scrollConteudoDetalhes.setVisibility(View.VISIBLE);
                     ginasio = ginasioReal;
                     preencherDados(ginasio);
-                    // Assim que os dados chegam, verifica o estado do favorito
                     observarFavorito();
                 });
             }
@@ -174,7 +170,6 @@ public class DetalheGinasioActivity extends AppCompatActivity {
     }
 
     private void verificarPermissaoEIniciarQr() {
-        // Validação da regra de negócio delegada ao VisitasService
         try {
             visitasService.validarRegrasVisita(ginasio);
         } catch (InvalidDataException erro) {
@@ -199,7 +194,6 @@ public class DetalheGinasioActivity extends AppCompatActivity {
     }
 
     private void processarResultadoQr(String conteudo) {
-        // Validação do QR e regras de negócio delegadas ao VisitasService
         try {
             visitasService.validarQrCodeGinasio(ginasio, conteudo);
             registarVisitaNoServidor();
@@ -212,7 +206,6 @@ public class DetalheGinasioActivity extends AppCompatActivity {
         btnRegistarVisita.setEnabled(false);
         Toast.makeText(this, "A registar visita...", Toast.LENGTH_SHORT).show();
 
-        // Passa o modelo Ginasio completo para o VisitasService aplicar as regras
         visitasService.registarVisita(ginasio, new VisitasService.EscritaCallback() {
             @Override
             public void onSucesso() {

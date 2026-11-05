@@ -7,7 +7,6 @@ plugins {
     id("com.google.gms.google-services")
 }
 
-// 1. LER O FICHEIRO local.properties (Sintaxe Kotlin)
 val properties = Properties()
 val localPropertiesFile = project.rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -37,7 +36,6 @@ android {
         val baseUrl = properties.getProperty("BASE_URL") ?: ""
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
 
-        // ATENÇÃO: Se a tua chave se chamar GOOGLE_PLACES_API_KEY no local.properties
         val apiKey = properties.getProperty("GOOGLE_PLACES_API_KEY")
             ?: properties.getProperty("GOOGLE_API_KEY") ?: ""
         buildConfigField("String", "GOOGLE_PLACES_API_KEY", "\"$apiKey\"")
@@ -48,7 +46,6 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
-    // 3. ATIVAR A CLASSE BuildConfig (Tem de ficar solto dentro do bloco 'android')
     buildFeatures {
         buildConfig = true
     }
@@ -70,23 +67,16 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
     implementation("com.google.android.gms:play-services-maps:20.1.0")
-
-    // Para obter o GPS do utilizador
     implementation("com.google.android.gms:play-services-location:21.4.0")
 
-    // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:35.0.0"))
-
-    // Auth e Firestore
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    // O resto que já tinhas:
     implementation("androidx.activity:activity:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.2")
     implementation("com.google.firebase:firebase-analytics")
 
-    // Leitor de QR Code para check-in (Câmara)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     testImplementation("junit:junit:4.13.2")

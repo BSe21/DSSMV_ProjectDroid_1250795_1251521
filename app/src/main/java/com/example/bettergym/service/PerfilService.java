@@ -37,24 +37,16 @@ public class PerfilService {
         mAuth.signOut();
     }
 
-    // AQUI ESTÁ O FLUXO DO FIREBASE!
     public void carregarPerfil(String uid, PerfilCallback callback) {
         new Thread(() -> {
             try {
-
                 String url = BuildConfig.BASE_URL + "perfis/" + uid;
-
-
                 String respostaJson = NetworkHandler.get(url, null);
-
 
                 PerfilDTO dto = JsonHandler.deSerializeFirebaseJson2PerfilDTO(respostaJson);
 
                 if (dto != null) {
-
                     Perfil perfil = Mapper.toModel(uid, dto);
-
-
                     callback.onSuccess(perfil);
                 } else {
                     callback.onError(new Exception("Perfil não encontrado ou vazio."));
@@ -65,7 +57,6 @@ public class PerfilService {
         }).start();
     }
 
-    // Estatísticas (Mantém-se igual pois devolve apenas um número)
     public void contarEstatistica(String colecao, String uid, ContagemCallback callback) {
         db.collection(colecao).whereEqualTo("user_id", uid)
                 .count().get(AggregateSource.SERVER)

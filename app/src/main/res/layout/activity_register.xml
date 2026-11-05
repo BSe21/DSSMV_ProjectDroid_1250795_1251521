@@ -14,7 +14,6 @@
             android:layout_height="wrap_content"
             android:padding="32dp">
 
-        <!-- Título da App -->
         <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
@@ -27,7 +26,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Subtítulo -->
         <TextView
                 android:id="@+id/subtitle"
                 android:layout_width="wrap_content"
@@ -40,7 +38,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/title" />
 
-        <!-- Foto de Perfil -->
         <ImageView
                 android:id="@+id/imgProfile"
                 android:layout_width="100dp"
@@ -67,7 +64,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/imgProfile" />
 
-        <!-- Nome Completo -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/nameLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -90,7 +86,6 @@
                     android:inputType="textPersonName|textCapWords" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Nome de Utilizador (Username) -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/usernameLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -113,7 +108,6 @@
                     android:inputType="textNoSuggestions" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Data de Nascimento -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/birthDateLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -129,7 +123,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/usernameLayout">
 
-            <!-- focusable=false e clickable=true permitem abrir o calendário ao clicar -->
             <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editBirthDate"
                     android:layout_width="match_parent"
@@ -139,7 +132,6 @@
                     android:inputType="date" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Número de Telemóvel -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/phoneLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -162,7 +154,6 @@
                     android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Email -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -185,7 +176,6 @@
                     android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -209,7 +199,6 @@
                     android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Confirmar password -->
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/confirmLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -233,7 +222,6 @@
                     android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Botão principal -->
         <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRegistar"
                 android:layout_width="0dp"
@@ -248,9 +236,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/confirmLayout" />
 
-        <!-- Link para voltar ao Login -->
         <TextView
                 android:id="@+id/txtLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:padding="8dp"
+                android:text="Já tens conta? Entra aqui"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnRegistar" />
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"

@@ -8,7 +8,6 @@ public class AvaliacaoDTO {
     private String descricao;
     private String data_avaliacao;
 
-    // Construtor vazio obrigatório para o Firebase.
     public AvaliacaoDTO() {}
 
     public String getId() { return id; }

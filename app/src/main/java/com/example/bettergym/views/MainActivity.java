@@ -1,4 +1,4 @@
-package com.example.bettergym.views; // Mantive o teu nome de package para não dar erro
+package com.example.bettergym.views;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean carregamentoAtivo = true;
     private final Runnable limiteCarregamento = () -> mostrarErroCarregamento(R.string.loading_timeout);
 
-    // Elementos do Cartão
     private CardView cardDetalhes;
     private TextView txtCardNome, txtCardAberto;
     private MaterialButton btnVerDetalhes;
@@ -87,32 +86,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         prepararEcraCarregamento();
 
-        // Ligar as views do cartão aos IDs do teu XML
         cardDetalhes = findViewById(R.id.cardDetalhesGinasio);
         txtCardNome = findViewById(R.id.txtCardNome);
         txtCardAberto = findViewById(R.id.txtCardAberto);
         btnVerDetalhes = findViewById(R.id.btnVerDetalhes);
 
-        // 1. Instancia o Serviço e o Cliente de GPS
         placesService = new PlacesService();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Aplicar padding apenas no topo e laterais; a BottomNavigationView trata do
-            // seu próprio padding inferior
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
 
-        // 2. Prepara o mapa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapaPrincipal);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
-        // 3. Barra de navegação inferior
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 
         voltarDoConteudo = new OnBackPressedCallback(false) {
@@ -160,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void mostrarConteudo(Fragment fragment) {
-        // O contentor é partilhado pelos ecrãs de perfil e favoritos.
         cardDetalhes.setVisibility(View.GONE);
         findViewById(R.id.containerPerfil).setVisibility(View.VISIBLE);
         getSupportFragmentManager().beginTransaction()
@@ -182,11 +174,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Delega o estilo visual ao MapHelper
         MapHelper.aplicarEstilo(this, mMap);
         ajustarEspacamento();
-
-        // Ligar a lógica do cartão interativo ao mapa!
         configurarCliquesMapa();
 
         if (!carregamentoAtivo)
@@ -225,9 +214,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         uiHandler.postDelayed(limiteCarregamento, 30000);
     }
 
-    // Apenas a UI Thread altera as Views. As percentagens representam etapas
-    // concluídas,
-    // e não um temporizador nem a percentagem de bytes descarregados.
     private void atualizarProgresso(int percentagem, int mensagem) {
         if (isFinishing() || isDestroyed() || !carregamentoAtivo)
             return;
@@ -255,18 +241,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void ajustarEspacamento() {
-        // Corrigido o erro de sintaxe do asterisco
         int paddingBottom = (int) (65 * getResources().getDisplayMetrics().density);
         mMap.setPadding(0, 0, 0, paddingBottom);
     }
 
     private void configurarCliquesMapa() {
-        // Esconder o cartão ao clicar num sítio vazio do mapa
         mMap.setOnMapClickListener(latLng -> cardDetalhes.setVisibility(View.GONE));
 
-        // Mostrar o cartão ao clicar num marcador
         mMap.setOnMarkerClickListener(marker -> {
-            Ginasio ginasio = (Ginasio) marker.getTag(); // Vai buscar o objeto guardado
+            Ginasio ginasio = (Ginasio) marker.getTag();
 
             if (ginasio != null) {
                 txtCardNome.setText(ginasio.getNome());
@@ -279,7 +262,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     txtCardAberto.setTextColor(Color.parseColor("#F44336"));
                 }
 
-                // Abre a ficha completa do ginásio selecionado.
                 btnVerDetalhes.setOnClickListener(v -> {
                     Intent intent = new Intent(MainActivity.this, DetalheGinasioActivity.class);
                     intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO_ID, ginasio.getId());
@@ -287,12 +269,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
 
                 cardDetalhes.setVisibility(View.VISIBLE);
-
-                // Centra a câmara no pino quando clicas nele
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
             }
 
-            return true; // TRUE significa que tratamos do clique e a janela antiga não abre
+            return true;
         });
     }
 
@@ -303,7 +283,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             ativarLocalizacaoECentrar();
         } else {
-            // O tempo de decisão do utilizador não conta como falha de carregamento.
             uiHandler.removeCallbacks(limiteCarregamento);
             requestPermissionLauncher.launch(new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION });

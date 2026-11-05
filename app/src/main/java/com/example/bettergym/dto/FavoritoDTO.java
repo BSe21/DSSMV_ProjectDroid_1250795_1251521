@@ -7,7 +7,6 @@ public class FavoritoDTO {
     private String data_adicionado;
     private PlaceGymDTO ginasio;
 
-    // Construtor vazio obrigatório para o Firebase.
     public FavoritoDTO() {}
 
     public String getId() { return id; }

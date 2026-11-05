@@ -85,7 +85,6 @@ public class AlterarPasswordDialogFragment extends DialogFragment {
     }
 
     private String texto(TextInputEditText campo) {
-        // Os espaços fazem parte da palavra-passe: não aplicar trim().
         return campo.getText() == null ? "" : campo.getText().toString();
     }
 

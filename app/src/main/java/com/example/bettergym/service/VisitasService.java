@@ -20,19 +20,37 @@ import java.util.Map;
 
 public class VisitasService {
 
-    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final FirebaseAuth auth;
+
+    public VisitasService() {
+        FirebaseAuth instancia = null;
+        try {
+            instancia = FirebaseAuth.getInstance();
+        } catch (Exception ignored) {
+        }
+        this.auth = instancia;
+    }
+
+    public VisitasService(FirebaseAuth auth) {
+        this.auth = auth;
+    }
 
     public interface EscritaCallback {
         void onSucesso();
+
         void onErro(Exception erro);
     }
 
     public interface VisitasCallback {
         void onResultado(List<Visita> visitas);
+
         void onErro(Exception erro);
     }
 
     private String uidAtual() {
+        if (auth == null) {
+            throw new InvalidDataException("Inicia sessão para registar uma visita.");
+        }
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             throw new InvalidDataException("Inicia sessão para registar uma visita.");
@@ -40,19 +58,7 @@ public class VisitasService {
         return user.getUid();
     }
 
-    // -------------------------------------------------------------------
-    // REGRAS DE NEGÓCIO DA VISITA (Responsabilidade da camada Service)
-    // -------------------------------------------------------------------
-
-    /**
-     * Valida se o ginásio cumpre todos os requisitos para registo de visita:
-     * 1. Utilizador autenticado
-     * 2. Ginásio com dados válidos
-     * 3. Ginásio aberto no momento do registo
-     */
-    public void validarRegrasVisita(Ginasio ginasio) throws InvalidDataException {
-        uidAtual(); // Garante utilizador autenticado
-
+    public void validarRegrasGinasio(Ginasio ginasio) throws InvalidDataException {
         if (ginasio == null || ginasio.getId() == null || ginasio.getId().trim().isEmpty()) {
             throw new InvalidDataException("Ginásio inválido para registar visita.");
         }
@@ -62,11 +68,15 @@ public class VisitasService {
         }
     }
 
-    /**
-     * Valida o conteúdo descodificado do código QR contra os dados do ginásio.
-     */
+    public void validarRegrasVisita(Ginasio ginasio) throws InvalidDataException {
+        if (auth != null) {
+            uidAtual();
+        }
+        validarRegrasGinasio(ginasio);
+    }
+
     public void validarQrCodeGinasio(Ginasio ginasio, String qrCodeLido) throws InvalidDataException {
-        validarRegrasVisita(ginasio);
+        validarRegrasGinasio(ginasio);
 
         if (qrCodeLido == null || qrCodeLido.trim().isEmpty()) {
             throw new InvalidDataException("Código QR vazio ou ilegível.");
@@ -86,19 +96,13 @@ public class VisitasService {
         }
     }
 
-    // -------------------------------------------------------------------
-    // REGISTAR UMA NOVA VISITA POR QR CODE
-    // Atualiza o array historico_ginasios_visitados do documento perfis/{uid}
-    // -------------------------------------------------------------------
     public void registarVisita(Ginasio ginasio, EscritaCallback callback) {
         new Thread(() -> {
             try {
-                // Aplicação da regra de negócio no Service antes de qualquer chamada de rede
                 validarRegrasVisita(ginasio);
 
                 String uid = uidAtual();
 
-                // 1. Obter perfil atual do utilizador para carregar o histórico existente
                 String urlGet = BuildConfig.BASE_URL + "perfis/" + uid;
                 String respostaJson = NetworkHandler.get(urlGet, null);
 
@@ -108,19 +112,18 @@ public class VisitasService {
                     historico.addAll(perfilDTO.getHistorico_ginasios_visitados());
                 }
 
-                // 2. Adicionar nova visita com timestamp ISO 8601 UTC através do DateHelper
                 String dataAtual = DateHelper.obterDataAtualIso();
 
                 String nome = (ginasio.getNome() != null && !ginasio.getNome().trim().isEmpty())
-                        ? ginasio.getNome().trim() : "Ginásio Visitado";
+                        ? ginasio.getNome().trim()
+                        : "Ginásio Visitado";
                 Visita novaVisita = new Visita(ginasio.getId(), dataAtual, nome);
                 historico.add(Mapper.toDTO(novaVisita));
 
-                // 3. Serializar o novo array com o JsonHandler
                 String jsonBody = JsonHandler.serializeHistoricoVisitasFirebaseJson(historico);
 
-                // 4. Executar PATCH com updateMask para não sobrepor outros campos do perfil
-                String urlPatch = BuildConfig.BASE_URL + "perfis/" + uid + "?updateMask.fieldPaths=historico_ginasios_visitados";
+                String urlPatch = BuildConfig.BASE_URL + "perfis/" + uid
+                        + "?updateMask.fieldPaths=historico_ginasios_visitados";
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
 
@@ -145,9 +148,6 @@ public class VisitasService {
         registarVisita(ginasioId, "", callback);
     }
 
-    // -------------------------------------------------------------------
-    // OBTER LISTA DE TODAS AS VISITAS DO UTILIZADOR ATUAL
-    // -------------------------------------------------------------------
     public void obterVisitas(VisitasCallback callback) {
         new Thread(() -> {
             try {
@@ -167,7 +167,6 @@ public class VisitasService {
                     }
                 }
 
-                // Ordenar por data mais recente primeiro
                 visitas.sort((a, b) -> {
                     String dataA = a.getData_visita() != null ? a.getData_visita() : "";
                     String dataB = b.getData_visita() != null ? b.getData_visita() : "";

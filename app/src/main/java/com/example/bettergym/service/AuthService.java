@@ -26,7 +26,6 @@ public class AuthService {
     private final FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    // Interface para comunicar o sucesso ou erro de volta à Activity
     public interface AuthCallback {
         void onSucesso(String mensagem);
         void onErro(Exception erro);
@@ -43,8 +42,6 @@ public class AuthService {
             callback.onErro(new DataConsistencyException("A sessão expirou. Volta a iniciar sessão."));
             return;
         }
-        // O SDK executa os pedidos de rede de forma assíncrona.
-        // A palavra-passe atual é confirmada pelo Firebase, nunca pelo Firestore.
         user.reauthenticate(EmailAuthProvider.getCredential(user.getEmail(), atual))
                 .addOnSuccessListener(ignored -> {
                     FirebaseUser current = mAuth.getCurrentUser();
@@ -82,7 +79,6 @@ public class AuthService {
                                   String telefone, String email, String password,
                                   String confirmarPassword, AuthCallback callback) {
 
-        // 1. Validações mantidas com as exceções do professor
         if (nome.isEmpty() || username.isEmpty() || dataNascimento.isEmpty() || telefone.isEmpty() || email.isEmpty() || password.isEmpty()) {
             throw new InvalidDataException("Por favor, preenche todos os campos obrigatórios.");
         }
@@ -99,15 +95,12 @@ public class AuthService {
             throw new InvalidDataException("As passwords não coincidem.");
         }
 
-
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         if (firebaseUser != null) {
                             String userId = firebaseUser.getUid();
-
-                            // 3. Se o Auth tiver sucesso, criamos o perfil na coleção "perfis" do Firestore
                             criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, email, callback);
                         } else {
                             callback.onErro(new DataConsistencyException("Erro de consistência: utilizador registado sem identificador válido."));
@@ -125,14 +118,12 @@ public class AuthService {
                 });
     }
 
-    // 4. Passo interno: Insere o perfil na coleção "perfis" do Firestore usando o model que criámos
     private void criarPerfilNaTabela(String userId, String nome, String username,
                                      String dataNascimento, String telefone, String email, AuthCallback callback) {
         try {
             SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
             iso.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-            // Usamos a classe Perfil que criámos anteriormente na pasta models
             Perfil perfil = new Perfil(
                     userId,
                     nome,
@@ -140,8 +131,7 @@ public class AuthService {
                     email,
                     dataNascimento,
                     telefone,
-
-                    "", // foto_url vazia por agora
+                    "",
                     iso.format(new Date())
             );
 
@@ -166,7 +156,6 @@ public class AuthService {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            // Devolvemos o UID do utilizador no sucesso
                             callback.onSucesso(user.getUid());
                         } else {
                             callback.onErro(new DataConsistencyException("Erro de consistência: utilizador sem sessão válida."));

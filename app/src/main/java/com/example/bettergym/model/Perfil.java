@@ -14,7 +14,6 @@ public class Perfil {
     private String data_registo;
     private List<Visita> historico_ginasios_visitados = new ArrayList<>();
 
-    // Construtor vazio obrigatório para o Firestore
     public Perfil() {}
 
     public Perfil(String id, String nome_completo, String username, String email,
@@ -44,7 +43,6 @@ public class Perfil {
         this.historico_ginasios_visitados = historico_ginasios_visitados != null ? historico_ginasios_visitados : new ArrayList<>();
     }
 
-    // Getters e Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

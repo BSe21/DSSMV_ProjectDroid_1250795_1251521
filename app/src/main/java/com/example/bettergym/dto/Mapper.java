@@ -17,7 +17,6 @@ public class Mapper {
             throw new DataConsistencyException("Inconsistência nos dados do ginásio: ID em falta.");
         }
 
-        // 1. Criamos a variável 'ginasio' primeiro
         Ginasio ginasio = new Ginasio(
                 dto.getId(),
                 dto.getNome(),
@@ -60,16 +59,13 @@ public class Mapper {
         if (dto == null || dto.getNome() == null) return false;
         String nome = dto.getNome().toLowerCase().trim();
 
-        // Se tiver palavras diretamente associadas a ginásios/fitness, aceita sempre
         if (nome.contains("ginásio") || nome.contains("ginasio") || nome.contains("gym") ||
                 nome.contains("fitness") || nome.contains("crossfit") || nome.contains("studio") ||
                 nome.contains("training") || nome.contains("workout")) {
-            // Exceto se for calistenia de rua / parque público
             if (nome.contains("street workout")) return false;
             return true;
         }
 
-        // Excluir recintos desportivos que não são ginásios convencionais para frequentar
         if (nome.contains("estádio") || nome.contains("estadio") ||
                 nome.contains("futebol") || nome.contains("basquetebol") ||
                 nome.contains("piscina") || nome.contains("polidesportivo") ||

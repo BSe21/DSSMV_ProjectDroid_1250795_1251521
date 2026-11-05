@@ -14,9 +14,6 @@ import java.util.Map;
 
 public class NetworkHandler {
 
-    // ---------------------------------------------------------
-    // MÉTODO POST (Criar / Enviar dados)
-    // ---------------------------------------------------------
     public static String post(String urlString, String jsonBody, Map<String, String> headers) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
@@ -58,9 +55,6 @@ public class NetworkHandler {
         return resposta.toString();
     }
 
-    // ---------------------------------------------------------
-    // NOVO: MÉTODO GET (Ler dados)
-    // ---------------------------------------------------------
     public static String get(String urlString, Map<String, String> headers) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
@@ -95,14 +89,10 @@ public class NetworkHandler {
         return resposta.toString();
     }
 
-    // ---------------------------------------------------------
-    // NOVO: MÉTODO PATCH (Atualizar dados - Ex: Histórico)
-    // ---------------------------------------------------------
     public static String patch(String urlString, String jsonBody, Map<String, String> headers) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
 
-        // Truque para o Java aceitar o método PATCH
         conexao.setRequestMethod("POST");
         conexao.setRequestProperty("X-HTTP-Method-Override", "PATCH");
         conexao.setConnectTimeout(10000);
@@ -141,9 +131,6 @@ public class NetworkHandler {
         return resposta.toString();
     }
 
-    // ---------------------------------------------------------
-    // NOVO: MÉTODO DELETE (Apagar dados - Ex: Remover Favorito)
-    // ---------------------------------------------------------
     public static String delete(String urlString, Map<String, String> headers) throws Exception {
         URL url = new URL(urlString);
         HttpURLConnection conexao = (HttpURLConnection) url.openConnection();
@@ -159,13 +146,11 @@ public class NetworkHandler {
         }
 
         int responseCode = conexao.getResponseCode();
-        // 200 OK ou 204 No Content são respostas normais de sucesso no DELETE
         if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
             throw new Exception("Erro na ligação HTTP DELETE. Código: " + responseCode);
         }
 
         StringBuilder resposta = new StringBuilder();
-        // O DELETE por vezes não devolve texto, por isso protegemos a leitura
         InputStream is = conexao.getInputStream();
         if (is != null) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -180,14 +165,9 @@ public class NetworkHandler {
         return resposta.toString();
     }
 
-    // ---------------------------------------------------------
-    // DOWNLOAD DE FOTOS
-    // ---------------------------------------------------------
     public static Bitmap downloadBitmap(String urlFoto) throws Exception {
         URL url = new URL(urlFoto);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-        // Tempos de espera um pouco maiores para imagens pesadas
         conn.setConnectTimeout(10000);
         conn.setReadTimeout(15000);
 

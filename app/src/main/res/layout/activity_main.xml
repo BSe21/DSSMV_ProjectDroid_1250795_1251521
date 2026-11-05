@@ -8,7 +8,6 @@
         android:layout_height="match_parent"
         tools:context=".views.MainActivity">
 
-    <!-- 1. Top App Bar importada de ficheiro separado -->
     <include
             android:id="@+id/includeTopAppBar"
             layout="@layout/top_app_bar"
@@ -18,7 +17,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 2. Mapa Principal -->
     <androidx.fragment.app.FragmentContainerView
             android:id="@+id/mapaPrincipal"
             android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -29,7 +27,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-    <!--  2.1 Contentor do ecrã de Perfil (aparece por cima do mapa, entre a barra de cima e a de baixo)  -->
     <androidx.fragment.app.FragmentContainerView
             android:id="@+id/containerPerfil"
             android:layout_width="0dp"
@@ -40,7 +37,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- O NOVO CARTÃO (Escondido por defeito, agora com constraints!) -->
     <androidx.cardview.widget.CardView
             android:id="@+id/cardDetalhesGinasio"
             android:layout_width="0dp"
@@ -85,7 +81,6 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- 3. Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"
             android:layout_width="0dp"
@@ -100,7 +95,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Ecrã completo sobre o mapa enquanto as etapas reais terminam. -->
     <include
             android:id="@+id/ecraCarregamento"
             layout="@layout/view_carregamento"

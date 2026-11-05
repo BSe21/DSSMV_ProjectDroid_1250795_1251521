@@ -8,7 +8,6 @@
         android:background="#FAFAFA"
         tools:context=".views.PerfilFragment">
 
-    <!-- Conteúdo do Perfil (visível após carregar) -->
     <ScrollView
             android:id="@+id/scrollConteudoPerfil"
             android:layout_width="match_parent"
@@ -23,7 +22,6 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-            <!--  Título do ecrã  -->
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -32,7 +30,6 @@
                     android:textColor="@color/primary"
                     android:textSize="26sp"/>
 
-            <!--  Foto de perfil (ou iniciais, se ainda não houver foto)  -->
             <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardFotoPerfil"
                     android:layout_width="110dp"
@@ -63,7 +60,6 @@
                         android:textSize="38sp"/>
             </com.google.android.material.card.MaterialCardView>
 
-            <!--  Nome e nome de utilizador  -->
             <TextView
                     android:id="@+id/txtNome"
                     android:layout_width="wrap_content"
@@ -84,7 +80,6 @@
                     android:textColor="#666666"
                     android:textSize="15sp"/>
 
-            <!--  Estatísticas (Visitas e Favoritos)  -->
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -169,7 +164,6 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!--  Dados da conta  -->
             <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -261,7 +255,6 @@
                     android:textStyle="bold"
                     app:cornerRadius="12dp" />
 
-            <!--  Terminar sessão  -->
             <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLogout"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -277,7 +270,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Indicador de Carregamento Centralizado -->
     <LinearLayout
             android:id="@+id/layoutCarregamentoPerfil"
             android:layout_width="match_parent"

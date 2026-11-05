@@ -44,7 +44,6 @@ public class PerfilFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Instancia o serviço e vai buscar o ID do utilizador atual
         perfilService = new PerfilService();
         String uid = perfilService.getCurrentUserId();
 
@@ -68,11 +67,9 @@ public class PerfilFragment extends Fragment {
             }
         });
 
-        // 2. Pede os dados ao Serviço
         perfilService.carregarPerfil(uid, new PerfilService.PerfilCallback() {
             @Override
             public void onSuccess(Perfil perfil) {
-                // VOLTAR À THREAD DO ECRÃ!
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         if (isAdded()) mostrarPerfil(perfil);
@@ -82,7 +79,6 @@ public class PerfilFragment extends Fragment {
 
             @Override
             public void onError(Exception e) {
-                // VOLTAR À THREAD DO ECRÃ PARA MOSTRAR O TOAST E TEXTO!
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         if (isAdded()) {
@@ -97,7 +93,6 @@ public class PerfilFragment extends Fragment {
             }
         });
 
-        // 3. Pede as restantes estatísticas ao Serviço
         perfilService.contarEstatistica("favoritos", uid, contagem -> {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> { if (isAdded()) txtFavoritos.setText(String.valueOf(contagem)); });
@@ -125,7 +120,6 @@ public class PerfilFragment extends Fragment {
         if (layoutCarregamentoPerfil != null) layoutCarregamentoPerfil.setVisibility(View.GONE);
         if (scrollConteudoPerfil != null) scrollConteudoPerfil.setVisibility(View.VISIBLE);
 
-        // Usa o helper Utils para formatar o texto e proteger contra Nulos
         txtNome.setText(Utils.valorOuTraco(perfil.getNome_completo()));
         txtUsername.setText(perfil.getUsername() == null || perfil.getUsername().isEmpty() ? "" : "@" + perfil.getUsername());
         txtEmail.setText(Utils.valorOuTraco(perfil.getEmail()));
@@ -134,7 +128,6 @@ public class PerfilFragment extends Fragment {
         txtMembroDesde.setText(Utils.formatarDataRegisto(perfil.getData_registo()));
         txtIniciais.setText(Utils.iniciais(perfil.getNome_completo()));
 
-        // Contagem de visitas a partir do historico_ginasios_visitados do perfil
         if (perfil.getHistorico_ginasios_visitados() != null) {
             txtVisitas.setText(String.valueOf(perfil.getHistorico_ginasios_visitados().size()));
         } else {
@@ -150,7 +143,6 @@ public class PerfilFragment extends Fragment {
     private void carregarFoto(String urlFoto) {
         new Thread(() -> {
             try {
-                // Pede o download da foto diretamente ao NetworkHandler
                 Bitmap bitmap = NetworkHandler.downloadBitmap(urlFoto);
                 if (bitmap != null && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
@@ -161,7 +153,6 @@ public class PerfilFragment extends Fragment {
                     });
                 }
             } catch (Exception e) {
-                // Mantém as iniciais em caso de erro na rede
             }
         }).start();
     }

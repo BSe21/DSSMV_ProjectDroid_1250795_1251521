@@ -48,12 +48,9 @@ public class FavoritosFragment extends Fragment {
     private void carregar() {
         mostrarEstado(R.string.favorites_loading, true, false, false);
 
-        // MUDOU AQUI (apagou-se a variável e mudou o nome para obterLista)
         service.obterLista(new FavoritosService.ListaCallback() {
             @Override public void onResultado(List<Favorito> favoritos) {
-                // ADICIONA ESTAS DUAS LINHAS:
                 if (getActivity() != null) getActivity().runOnUiThread(() -> {
-
                     View view = getView();
                     if (view == null) return;
                     adapter.atualizar(favoritos);
@@ -63,13 +60,10 @@ public class FavoritosFragment extends Fragment {
                         view.findViewById(R.id.estadoFavoritos).setVisibility(View.GONE);
                         view.findViewById(R.id.listaFavoritos).setVisibility(View.VISIBLE);
                     }
-
-                    // ADICIONA ESTA LINHA PARA FECHAR:
                 });
             }
 
             @Override public void onErro(Exception erro) {
-                // ENVOLVE A LINHA DELE:
                 if (getActivity() != null) getActivity().runOnUiThread(() -> {
                     mostrarEstado(R.string.favorites_error, false, false, true);
                 });
@@ -90,7 +84,6 @@ public class FavoritosFragment extends Fragment {
 
     private void abrirDetalhes(Favorito favorito) {
         Intent intent = new Intent(requireContext(), DetalheGinasioActivity.class);
-        // Passamos apenas o ID do ginásio em vez do objeto inteiro!
         intent.putExtra(DetalheGinasioActivity.EXTRA_GINASIO_ID, favorito.getGinasio_id());
         startActivity(intent);
     }
@@ -100,18 +93,16 @@ public class FavoritosFragment extends Fragment {
         atual.definirOcupado(favorito.getGinasio_id(), true);
         service.remover(favorito.getGinasio_id(), new FavoritosService.EscritaCallback() {
             @Override public void onSucesso() {
-                // ADICIONA O RUN ON UI THREAD E O CARREGAR():
                 if (getActivity() != null) getActivity().runOnUiThread(() -> {
                     atual.definirOcupado(favorito.getGinasio_id(), false);
                     if (getView() != null) Toast.makeText(requireContext(),
                             R.string.favorites_removed, Toast.LENGTH_SHORT).show();
 
-                    carregar(); // <--- NOVA LINHA PARA ATUALIZAR A LISTA
+                    carregar();
                 });
             }
 
             @Override public void onErro(Exception erro) {
-                // ENVOLVE O CÓDIGO DELE:
                 if (getActivity() != null) getActivity().runOnUiThread(() -> {
                     atual.definirOcupado(favorito.getGinasio_id(), false);
                     String msg = getString(R.string.favorites_write_error);

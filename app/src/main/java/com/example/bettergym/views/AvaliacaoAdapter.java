@@ -1,4 +1,4 @@
-package com.example.bettergym.views; // Ajusta o package se necessário
+package com.example.bettergym.views;
 
 import android.content.Context;
 import android.view.LayoutInflater;

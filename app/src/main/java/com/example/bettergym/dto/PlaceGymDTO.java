@@ -16,10 +16,8 @@ public class PlaceGymDTO {
     private String referenciaFoto;
     private List<String> fotos = new ArrayList<>();
 
-    // Construtor vazio (sempre boa prática, especialmente se usares Firebase mais tarde)
     public PlaceGymDTO() {}
 
-    // Construtor com os campos todos
     public PlaceGymDTO(String id, String nome, double latitude, double longitude, double rating, boolean abertoAgora) {
         this.id = id;
         this.nome = nome;
@@ -37,7 +35,6 @@ public class PlaceGymDTO {
         this.referenciaFoto = referenciaFoto;
     }
 
-    // Getters e Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
