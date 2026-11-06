@@ -2,6 +2,8 @@ package com.example.bettergym.views;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,12 +12,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.bettergym.R;
 import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.helper.ImageHelper;
 import com.example.bettergym.helper.Utils;
 import com.example.bettergym.handler.NetworkHandler;
 import com.example.bettergym.model.Perfil;
@@ -33,6 +38,15 @@ public class PerfilFragment extends Fragment {
     private MaterialButton btnLogout;
     private View layoutCarregamentoPerfil;
     private View scrollConteudoPerfil;
+
+    private final ActivityResultLauncher<String> seletorFotoLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    atualizarFoto(uri);
+                }
+            }
+    );
 
     @Nullable
     @Override
@@ -114,6 +128,11 @@ public class PerfilFragment extends Fragment {
         txtNascimento = view.findViewById(R.id.txtNascimento);
         txtMembroDesde = view.findViewById(R.id.txtMembroDesde);
         btnLogout = view.findViewById(R.id.btnLogout);
+
+        View cardFotoPerfil = view.findViewById(R.id.cardFotoPerfil);
+        if (cardFotoPerfil != null) {
+            cardFotoPerfil.setOnClickListener(v -> seletorFotoLauncher.launch("image/*"));
+        }
     }
 
     private void mostrarPerfil(Perfil perfil) {
@@ -134,27 +153,84 @@ public class PerfilFragment extends Fragment {
             txtVisitas.setText("0");
         }
 
-        String foto = perfil.getFoto_url();
-        if (foto != null && foto.startsWith("http")) {
-            carregarFoto(foto);
+        exibirFoto(perfil.getFoto_url());
+    }
+
+    private void exibirFoto(String foto) {
+        if (foto == null || foto.trim().isEmpty()) {
+            imgFotoPerfil.setVisibility(View.GONE);
+            txtIniciais.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (foto.startsWith("http")) {
+            new Thread(() -> {
+                try {
+                    Bitmap bitmap = NetworkHandler.downloadBitmap(foto);
+                    if (bitmap != null && getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (!isAdded()) return;
+                            imgFotoPerfil.setImageBitmap(bitmap);
+                            imgFotoPerfil.setVisibility(View.VISIBLE);
+                            txtIniciais.setVisibility(View.GONE);
+                        });
+                    }
+                } catch (Exception ignored) {
+                }
+            }).start();
+        } else {
+            try {
+                String base64 = foto;
+                if (base64.contains(",")) {
+                    base64 = base64.substring(base64.indexOf(",") + 1);
+                }
+                byte[] decoded = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                if (bitmap != null) {
+                    imgFotoPerfil.setImageBitmap(bitmap);
+                    imgFotoPerfil.setVisibility(View.VISIBLE);
+                    txtIniciais.setVisibility(View.GONE);
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
 
-    private void carregarFoto(String urlFoto) {
-        new Thread(() -> {
-            try {
-                Bitmap bitmap = NetworkHandler.downloadBitmap(urlFoto);
-                if (bitmap != null && getActivity() != null) {
+    private void atualizarFoto(Uri uri) {
+        String uid = perfilService.getCurrentUserId();
+        if (uid == null) return;
+
+        byte[] fotoBytes = ImageHelper.comprimirImagem(requireContext(), uri);
+        if (fotoBytes == null || fotoBytes.length == 0) {
+            Toast.makeText(requireContext(), "Não foi possível carregar a imagem selecionada.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(requireContext(), "A atualizar foto de perfil...", Toast.LENGTH_SHORT).show();
+
+        perfilService.atualizarFotoPerfil(uid, fotoBytes, new PerfilService.FotoCallback() {
+            @Override
+            public void onSuccess(String fotoUrl) {
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         if (!isAdded()) return;
-                        imgFotoPerfil.setImageBitmap(bitmap);
-                        imgFotoPerfil.setVisibility(View.VISIBLE);
-                        txtIniciais.setVisibility(View.GONE);
+                        exibirFoto(fotoUrl);
+                        Toast.makeText(requireContext(), "Foto de perfil atualizada!", Toast.LENGTH_SHORT).show();
                     });
                 }
-            } catch (Exception e) {
             }
-        }).start();
+
+            @Override
+            public void onError(Exception e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return;
+                        String msg = e != null && e.getMessage() != null ? e.getMessage() : "Erro ao atualizar foto de perfil.";
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
     }
 
     private void terminarSessao() {

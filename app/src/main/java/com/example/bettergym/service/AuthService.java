@@ -10,11 +10,14 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.example.bettergym.exceptions.DataConsistencyException;
 import com.example.bettergym.exceptions.DuplicatedDataException;
 import com.example.bettergym.exceptions.InvalidDataException;
+import com.example.bettergym.helper.ImageHelper;
 import com.example.bettergym.helper.PasswordValidator;
 import com.example.bettergym.model.Perfil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -78,6 +81,12 @@ public class AuthService {
     public void registarNovaConta(String nome, String username, String dataNascimento,
                                   String telefone, String email, String password,
                                   String confirmarPassword, AuthCallback callback) {
+        registarNovaConta(nome, username, dataNascimento, telefone, email, password, confirmarPassword, null, callback);
+    }
+
+    public void registarNovaConta(String nome, String username, String dataNascimento,
+                                  String telefone, String email, String password,
+                                  String confirmarPassword, byte[] fotoBytes, AuthCallback callback) {
 
         if (nome.isEmpty() || username.isEmpty() || dataNascimento.isEmpty() || telefone.isEmpty() || email.isEmpty() || password.isEmpty()) {
             throw new InvalidDataException("Por favor, preenche todos os campos obrigatórios.");
@@ -101,7 +110,11 @@ public class AuthService {
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         if (firebaseUser != null) {
                             String userId = firebaseUser.getUid();
-                            criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, email, callback);
+                            if (fotoBytes != null && fotoBytes.length > 0) {
+                                uploadFotoPerfilECriar(userId, nome, username, dataNascimento, telefone, email, fotoBytes, callback);
+                            } else {
+                                criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, email, "", callback);
+                            }
                         } else {
                             callback.onErro(new DataConsistencyException("Erro de consistência: utilizador registado sem identificador válido."));
                         }
@@ -118,8 +131,16 @@ public class AuthService {
                 });
     }
 
+    private void uploadFotoPerfilECriar(String userId, String nome, String username,
+                                        String dataNascimento, String telefone, String email,
+                                        byte[] fotoBytes, AuthCallback callback) {
+        String fotoUrl = ImageHelper.converterParaBase64(fotoBytes);
+        criarPerfilNaTabela(userId, nome, username, dataNascimento, telefone, email, fotoUrl, callback);
+    }
+
     private void criarPerfilNaTabela(String userId, String nome, String username,
-                                     String dataNascimento, String telefone, String email, AuthCallback callback) {
+                                     String dataNascimento, String telefone, String email,
+                                     String fotoUrl, AuthCallback callback) {
         try {
             SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
             iso.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -131,7 +152,7 @@ public class AuthService {
                     email,
                     dataNascimento,
                     telefone,
-                    "",
+                    fotoUrl != null ? fotoUrl : "",
                     iso.format(new Date())
             );
 

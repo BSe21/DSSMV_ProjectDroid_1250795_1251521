@@ -3,10 +3,13 @@ package com.example.bettergym.service;
 import com.example.bettergym.BuildConfig;
 import com.example.bettergym.dto.Mapper;
 import com.example.bettergym.dto.PerfilDTO;
+import com.example.bettergym.helper.ImageHelper;
 import com.example.bettergym.model.Perfil;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.AggregateSource;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.example.bettergym.handler.JsonHandler;
 import com.example.bettergym.handler.NetworkHandler;
 
@@ -24,6 +27,11 @@ public class PerfilService {
 
     public interface ContagemCallback {
         void onResultado(long contagem);
+    }
+
+    public interface FotoCallback {
+        void onSuccess(String fotoUrl);
+        void onError(Exception e);
     }
 
     public String getCurrentUserId() {
@@ -62,5 +70,18 @@ public class PerfilService {
                 .count().get(AggregateSource.SERVER)
                 .addOnSuccessListener(resultado -> callback.onResultado(resultado.getCount()))
                 .addOnFailureListener(e -> callback.onResultado(0));
+    }
+
+    public void atualizarFotoPerfil(String uid, byte[] fotoBytes, FotoCallback callback) {
+        if (uid == null || uid.isEmpty() || fotoBytes == null || fotoBytes.length == 0) {
+            callback.onError(new Exception("Dados de imagem inválidos."));
+            return;
+        }
+
+        String fotoUrl = ImageHelper.converterParaBase64(fotoBytes);
+        db.collection("perfis").document(uid)
+                .update("foto_url", fotoUrl)
+                .addOnSuccessListener(aVoid -> callback.onSuccess(fotoUrl))
+                .addOnFailureListener(callback::onError);
     }
 }

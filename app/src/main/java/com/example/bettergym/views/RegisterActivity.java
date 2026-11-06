@@ -14,6 +14,7 @@ import com.example.bettergym.R;
 import com.example.bettergym.exceptions.InvalidDataException;
 import com.example.bettergym.exceptions.DuplicatedDataException;
 import com.example.bettergym.exceptions.DataConsistencyException;
+import com.example.bettergym.helper.ImageHelper;
 import com.example.bettergym.service.AuthService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -91,11 +92,16 @@ public class RegisterActivity extends AppCompatActivity {
         String password = editPassword.getText().toString();
         String confirmar = editConfirmPassword.getText().toString();
 
+        byte[] fotoBytes = null;
+        if (fotoPerfilUri != null) {
+            fotoBytes = ImageHelper.comprimirImagem(this, fotoPerfilUri);
+        }
+
         try {
             btnRegistar.setEnabled(false);
             btnRegistar.setText("A criar conta...");
 
-            authService.registarNovaConta(nome, username, dataNasc, telefone, email, password, confirmar, new AuthService.AuthCallback() {
+            authService.registarNovaConta(nome, username, dataNasc, telefone, email, password, confirmar, fotoBytes, new AuthService.AuthCallback() {
                 @Override
                 public void onSucesso(String mensagem) {
                     Toast.makeText(RegisterActivity.this, mensagem, Toast.LENGTH_LONG).show();
