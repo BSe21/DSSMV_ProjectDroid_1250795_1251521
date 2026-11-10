@@ -144,9 +144,7 @@ public class VisitasService {
         registarVisita(g, callback);
     }
 
-    public void registarVisita(String ginasioId, EscritaCallback callback) {
-        registarVisita(ginasioId, "", callback);
-    }
+
 
     public void obterVisitas(VisitasCallback callback) {
         new Thread(() -> {
