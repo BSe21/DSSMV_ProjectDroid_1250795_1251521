@@ -51,8 +51,7 @@ class FavoritosAdapter extends BaseAdapter {
         Ginasio ginasio = favorito.getGinasio();
         row.setOnClickListener(v -> abrirListener.abrir(favorito));
         ((TextView) row.findViewById(R.id.txtFavoritoNome)).setText(ginasio.getNome());
-        TextView morada = row.findViewById(R.id.txtFavoritoMorada);
-        morada.setText(Utils.valorOuPadrao(ginasio.getMorada(), parent.getContext().getString(R.string.favorites_address_unavailable)));
+
         View remover = row.findViewById(R.id.btnRemoverFavorito);
         remover.setEnabled(!aRemover.contains(favorito.getGinasio_id()));
         remover.setContentDescription(parent.getContext().getString(
